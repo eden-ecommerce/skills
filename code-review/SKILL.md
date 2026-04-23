@@ -5,7 +5,7 @@ agents:
   - cursor
 ---
 
-/caveman lite
+/caveman full
 
 YOU = ruthless senior reviewer + break-tester. No fluff. Output bullets only.
 
@@ -16,7 +16,7 @@ STEP 0 — PLAN FIRST
 Write short plan (max 8 bullets) BEFORE doing anything.
 
 STEP 1 — LOAD RULES / NORMS
-Read .cursor/ (rules/skills). Extract codebase principles + patterns used. Follow them.
+Read .cursor/ (rules/skills). Read docs/**/*.md when repo has docs/ — principles + patterns there too. Extract codebase principles + patterns used. Follow them.
 
 STEP 2 — DIFF
 Run:
@@ -25,7 +25,14 @@ Run:
 - git diff --stat origin/master...HEAD
 List changed files + what changed.
 
-STEP 3 — CODE REVIEW (HARD MODE)
+STEP 3 — NAMES + COMMENTS
+Before deep logic pass on changed files:
+- Strip noisy comments (restates code, stale). Keep why / non-obvious invariant / tradeoff. Prefer clear name over comment when rename fixes it.
+- Rename weak vars, fns, classes, types, hooks so name matches job.
+- Naming style must match surrounding code — same case, prefixes/suffixes, patterns file already uses.
+- Same pass: rename + drop redundant comments; fix orphan comments after rename.
+
+STEP 4 — CODE REVIEW (HARD MODE)
 For EACH changed file:
 - Compare to existing codebase patterns. Reuse existing methods/components. Enforce DRY + KISS.
 - Check architecture & file structure. Identify correct layer/file to live in.
@@ -36,14 +43,14 @@ For EACH changed file:
 - For dynamic rendering: use Presenter/MVC-ish parent that maps data + renderItem (pure renderer). Parent owns switching. Child owns display.
 - Ensure scalable + robust.
 
-STEP 4 — API/SERVER/DATA SCALABILITY REVIEW
+STEP 5 — API/SERVER/DATA SCALABILITY REVIEW
 For any data logic:
 - Evaluate DB-first vs memory-first tradeoffs.
 - Prefer push filtering/joins/indexing into DB query when sensible.
 - If not possible: propose batching + factories + maps/sets + dedupe arrays. Avoid N+1 and repeated transforms.
 - Call out perf hotspots + big-O + network roundtrips.
 
-STEP 5 — END USER ENV / COMPAT (MANDATORY)
+STEP 6 — END USER ENV / COMPAT (MANDATORY)
 Think like real user. Different device + OS + browser + client.
 - Identify target envs from repo/docs/config OR infer safe default matrix:
   - Desktop: Chrome(Blink), Safari(WebKit), Firefox(Gecko)
@@ -59,7 +66,7 @@ Think like real user. Different device + OS + browser + client.
   - Validate critical journeys + visuals on 1 browser per engine family + mobile WebKit
   - Note any required manual checks (email client previews / real inbox test)
 
-STEP 6 — BREAK TESTING (PRIMARY INTENT: BREAK IT)
+STEP 7 — BREAK TESTING (PRIMARY INTENT: BREAK IT)
 Try to break feature:
 - Edge cases, null/empty/huge inputs, latency, partial failures, retry, race conditions.
 - UX journey issues: confusing states, missing messages, wrong defaults.
@@ -67,7 +74,7 @@ Try to break feature:
 - Perf: unnecessary rerenders, expensive loops, missing memoization.
 - Security: injection, authz gaps, data leakage, unsafe logging.
 
-STEP 7 — RUN QUALITY GATES (MANDATORY)
+STEP 8 — RUN QUALITY GATES (MANDATORY)
 Run formatting + linting + typecheck + project scripts.
 In terminal run ALL relevant package.json scripts, including:
 - pnpm run lint
@@ -78,7 +85,7 @@ In terminal run ALL relevant package.json scripts, including:
 Also run any required npx scripts defined by repo.
 If any command fails: paste error + root cause + fix.
 
-STEP 8 — REPORT (STRICT FORMAT)
+STEP 9 — REPORT (STRICT FORMAT)
 Give:
 A) SCORE % (overall + per category):
 - Architecture, Reuse/DRY, Correctness, UX, A11y, Perf, Security, Scalability, Compat/Env, Tooling (lint/ts/scripts)
@@ -92,8 +99,7 @@ RULES:
 - If a category has ZERO issues, omit it. Don't invent problems.
 - Prefer small refactors. Don't rewrite whole app unless required.
 
-STEP 9 — AMBIGUITY CHECK
+STEP 10 — AMBIGUITY CHECK
 Now run:
 /grill-me
 Ask me only the questions needed to remove ambiguity + confirm intent.
-
