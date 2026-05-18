@@ -6,8 +6,8 @@ Each target repo needs `.cursor/STRUCTURE.md` and `.cursor/CONTEXT.md`. Task bri
 
 ```bash
 npx skills@latest add eden-ecommerce/skills -a cursor --global --skill '*' -y
-npx skills@latest add mattpocock/skills -a cursor --global
-npx skills@latest add JuliusBrussee/caveman -a cursor --global
+npx skills@latest add mattpocock/skills -a cursor --global --skill '*' -y
+npx skills@latest add JuliusBrussee/caveman -a cursor --global --skill '*' -y
 ```
 
 Choose **Global** when prompted. Then reload Cursor (`Ctrl+Shift+P` → **Developer: Reload Window**).
