@@ -31,7 +31,7 @@ Choose **Global** when prompted. Then reload Cursor (`Ctrl+Shift+P` → **Develo
 | 1 | Ticket / notes | Paste raw task as received (`brief`) — no interpretation |
 | 2 | **ChatGPT** or **Copilot** | [Task interrogation prompt](#task-interrogation-prompt) — replace `TASK_TITLE`, `REPORTED_BY`, `TASK_DESCRIPTION` |
 | 3 | **PM** | Take model output → clarification + concerns (`refine`, `concerns`, `solutions`) → **written sign-off** (`feedback_pre`, `accept`) |
-| 4 | **Cursor Plan** | As needed → `docs/feature/<task-slug>/`: **`/document-current-state`**, **`/document-database`**, **`/document-flow`** |
+| 4 | **Cursor Plan** | As needed → `docs/task/<task-slug>/`: **`/document-current-state`**, **`/document-database`**, **`/document-flow`** |
 | 5 | **Cursor Plan** | **`/construct-plan`** — research, plan, scaffold, edge cases, verify vs docs |
 | 6 | **Cursor Plan** | **`/grill-with-docs`** — one question at a time; update `.cursor/CONTEXT.md` until signed off |
 | 7 | **Cursor Agent** | Implement from scaffold; run STRUCTURE **Gates** until green (`scaffold` → `refinement`) |
