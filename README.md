@@ -26,7 +26,7 @@ Choose **Global** when prompted. Then reload Cursor (`Ctrl+Shift+P` → **Develo
 
 ## Developer steps
 
-| # | Where | What to run |
+| Step | Where | What to run |
 |---|--------|-------------|
 | 1 | **Slack List** | Paste raw task as received (`brief`) — no interpretation |
 | 2 | **ChatGPT** | [Task interrogation prompt](#task-interrogation-prompt) — replace `TASK_TITLE`, `REPORTED_BY`, `TASK_DESCRIPTION` |
