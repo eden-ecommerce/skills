@@ -39,7 +39,7 @@ Choose **Global** when prompted. Then reload Cursor (`Ctrl+Shift+P` → **Develo
 | 9 | **Cursor Agent** + **Browser tab** | **`/execute-test-plan`** — run each row (Cursor browser + MCP, or manual table) |
 | 10 | **Slack List Thread** | Peer review, staging demo, final feedback (`code_review`, `ux_feedback`, `feedback_post`) |
 | 11 | **Cursor Agent** | **`/generate-changelog`** — when repo ships `docs/releases/<version>.md` |
-| 12 | Deploy | Production deploy; close task (`deploy`) |
+| 12 | **Deploy** | Production deploy; close task (`deploy`) |
 
 ## Task interrogation prompt
 
