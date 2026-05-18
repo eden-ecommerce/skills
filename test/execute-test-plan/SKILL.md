@@ -1,6 +1,6 @@
 ---
 name: execute-test-plan
-description: "Run construct-test-plan rows: Cursor browser tab + MCP or manual; actual vs expected, severity, proposed fix, owner."
+description: "Run rows from /construct-test-plan output: Cursor browser tab + MCP or manual; actual vs expected, severity, proposed fix, owner."
 agents:
   - cursor
 ---
@@ -9,7 +9,7 @@ agents:
 
 **Repo cockpit:** `.cursor/STRUCTURE.md` (base URL, browser policy) + `.cursor/CONTEXT.md`.
 
-**Bind:** Input = markdown / file from **`test/construct-test-plan`** (same task scope). Base URL from STRUCTURE or user.
+**Bind:** Input = markdown / file from **`/construct-test-plan`** output (same task scope). Base URL from STRUCTURE or user.
 
 **Output:** One table row **per** checklist row (happy path, abuse, responsive). Columns:
 

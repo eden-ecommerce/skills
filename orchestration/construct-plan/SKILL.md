@@ -1,6 +1,6 @@
 ---
 name: construct-plan
-description: "Bind STRUCTURE; 7-phase workflow: research docs → plan → grill-with-docs → scaffold → human gate → edge cases → verify vs docs; then one stack delegate, gates, handoff."
+description: "Bind STRUCTURE; 7-phase workflow: research docs → plan → grill-with-docs → scaffold → human gate → edge cases → verify vs docs; then implement, gates, handoff."
 agents:
   - cursor
 ---
@@ -13,7 +13,7 @@ agents:
 
 **Pipeline (order matters; no code until step 5 sign-off):**
 
-1. **Research + document** — Artefact root `docs/feature/<task-slug>/` (STRUCTURE may override path). One `.md` per artefact type as needed: `documentation/document-current-state` (constraints / “ship today”), `documentation/document-database` (ER / joins from code; DB truth only via STRUCTURE-approved commands), `documentation/document-flow` (sequence or flowchart from code). No invented behaviour; mark inferred edges on diagrams per those skills.
+1. **Research + document** — Artefact root `docs/feature/<task-slug>/` (STRUCTURE may override path). One `.md` per artefact type as needed — run skill prompts: **`/document-current-state`** (constraints / “ship today”), **`/document-database`** (ER / joins from code; DB truth only via STRUCTURE-approved commands), **`/document-flow`** (sequence or flowchart from code). No invented behaviour; mark inferred edges on diagrams per those skills.
 
 2. **Construct plan** — ≤8 bullets: goal, contracts, files likely touched, risks, links to research files above. STRUCTURE + CONTEXT only for norms; no AGENTS bulk unless STRUCTURE points.
 
@@ -29,25 +29,15 @@ agents:
 
 **After pipeline green:**
 
-**Delegate:** Open exactly one stack skill once STRUCTURE names stack:
-
-| STRUCTURE says | Open skill (path under `.cursor/skills/`) |
-|----------------|------------|
-| UI framework (React/Vue/Svelte/RN…) | `code/code-implement-client` |
-| Typed HTTP API service in this repo | `code/code-implement-api` |
-| Server PHP / similar interpreted backend | `code/code-implement-server` |
-
-**Execute:** Smallest diff; match neighbour files STRUCTURE lists.
+**Execute:** Implement from scaffold; smallest diff; match neighbour files STRUCTURE lists.
 
 **Gates:** Copy-run every command in STRUCTURE **Gates** until green. Fail → paste error + fix + retry.
 
 **Loop:** Diff vs STRUCTURE patterns; still fuzzy → **`/grill-with-docs`** again.
 
-**Handoff:** **Exhaustive** — shipped behaviour, files touched, verify (commands + manual checks), risks open, follow-ups (tests, docs, migrations, contract regen if STRUCTURE says), owner questions. **No artificial bullet cap.** Still ambiguous for next agent → **`/grill-with-docs`** until closed or parked with ticket ref.
+**Handoff:** **Exhaustive** — shipped behaviour, files touched, verify (commands + manual checks); suggest **`/construct-test-plan`** then **`/execute-test-plan`**; risks open, follow-ups (docs, migrations, contract regen if STRUCTURE says), owner questions. **No artificial bullet cap.** Still ambiguous → **`/grill-with-docs`** until closed or parked with ticket ref.
 
 ### Optional examples (non-normative)
-
-Monorepo with nested implement skill: load that `SKILL.md` + **one** add-*.md it references — never load whole `references/` tree at once.
 
 **Generic file tree (adapt paths to STRUCTURE):**
 

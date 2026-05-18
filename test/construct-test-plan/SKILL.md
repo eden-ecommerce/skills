@@ -1,6 +1,6 @@
 ---
 name: construct-test-plan
-description: "Manual QA plan: matrix, personas, abuse, regression, sign-off, viewport/UI shell rows; browser steps get expected state before action."
+description: "Manual QA plan: matrix, personas, abuse, regression, sign-off, viewport/UI shell; browser steps get expected state before action."
 agents:
   - cursor
 ---
