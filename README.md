@@ -28,22 +28,22 @@ Choose **Global** when prompted. Then reload Cursor (`Ctrl+Shift+P` → **Develo
 
 | # | Where | What to run |
 |---|--------|-------------|
-| 1 | Ticket / notes | Paste raw task as received (`brief`) — no interpretation |
-| 2 | **ChatGPT** or **Copilot** | [Task interrogation prompt](#task-interrogation-prompt) — replace `TASK_TITLE`, `REPORTED_BY`, `TASK_DESCRIPTION` |
-| 3 | **PM** | Take model output → clarification + concerns (`refine`, `concerns`, `solutions`) → **written sign-off** (`feedback_pre`, `accept`) |
+| 1 | **Slack List** | Paste raw task as received (`brief`) — no interpretation |
+| 2 | **ChatGPT** | [Task interrogation prompt](#task-interrogation-prompt) — replace `TASK_TITLE`, `REPORTED_BY`, `TASK_DESCRIPTION` |
+| 3 | **Slack List Thread** | Take model output → clarification + concerns (`refine`, `concerns`, `solutions`) → **written sign-off** (`feedback_pre`, `accept`) |
 | 4 | **Cursor Plan** | As needed → `docs/task/<task-slug>/`: **`/document-current-state`**, **`/document-database`**, **`/document-flow`** |
 | 5 | **Cursor Plan** | **`/construct-plan`** — research, plan, scaffold, edge cases, verify vs docs |
 | 6 | **Cursor Plan** | **`/grill-with-docs`** — one question at a time; update `.cursor/CONTEXT.md` until signed off |
 | 7 | **Cursor Agent** | Implement from scaffold; run STRUCTURE **Gates** until green (`scaffold` → `refinement`) |
-| 8 | **Cursor** | **`/construct-test-plan`** — QA checklist (functional, abuse, responsive / theme / UI) |
-| 9 | **Cursor** + **Browser tab** | **`/execute-test-plan`** — run each row (Cursor browser + MCP, or manual table) |
-| 10 | **PM** / peers | Peer review, staging demo, final feedback (`code_review`, `ux_feedback`, `feedback_post`) |
-| 11 | **Cursor** | **`/generate-changelog`** — when repo ships `docs/releases/<version>.md` |
+| 8 | **Cursor Plan** | **`/construct-test-plan`** — QA checklist (functional, abuse, responsive / theme / UI) |
+| 9 | **Cursor Agent** + **Browser tab** | **`/execute-test-plan`** — run each row (Cursor browser + MCP, or manual table) |
+| 10 | **Slack List Thread** | Peer review, staging demo, final feedback (`code_review`, `ux_feedback`, `feedback_post`) |
+| 11 | **Cursor Agent** | **`/generate-changelog`** — when repo ships `docs/releases/<version>.md` |
 | 12 | Deploy | Production deploy; close task (`deploy`) |
 
 ## Task interrogation prompt
 
-Copy the **entire** block into ChatGPT or Copilot (step 2).
+Copy the **entire** block into ChatGPT (step 2).
 
 ````text
 You are a principal software engineer reviewing a development task BEFORE implementation begins.
