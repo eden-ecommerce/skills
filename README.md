@@ -182,9 +182,3 @@ ADDITIONAL RULES:
 - If something could be interpreted multiple ways, explicitly question it
 - If the task appears deceptively simple, identify hidden complexity
 ````
-
-## Links
-
-- [skills CLI](https://github.com/vercel-labs/skills)
-- [Cursor skills docs](https://cursor.com/docs/context/skills)
-- [This repository](https://github.com/eden-ecommerce/skills)
