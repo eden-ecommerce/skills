@@ -183,37 +183,16 @@ ADDITIONAL RULES:
 - If the task appears deceptively simple, identify hidden complexity
 ````
 
-## Example STRUCTURE.md file (stored in /.cursor/rules/STRUCTURE.md)
+## Example AGENTS.md file (stored in root repository directory)
 
 ```
 Context:
-- you MUST use the /caveman full skill to keep prompt token usage minimal and to the point
-- you MUST only run project script commands using pnpm
+- you MUST use the /caveman full skill
+- you MUST only run project script commands using pnpm in the correct docker container
 - all styling implemented with tailwindcss - utilise packages like tailwind-merge and tailwind-variants
-- all network requests MUST be handled using react query hook files with client hook and server fetch method
+- all network requests MUST be handled using react query hook files
 - consider page performance when constructing component hierarchy identifying component boundaries and verifying tradeoffs between server/client and partial prerendering with Suspense
-- you MUST always follow the plan below before starting the code implementation
 - render all icons using LucideIcons pnpm package
-
-Plan:
-1. Plan Context with Git Diff (high model)
-   a. Scope out task taking in to consideration the users changes using git diff command
-   b. Propose a component hierarchy - and make sure to utilise existing components in the project or if a new reusable Presenter component needs to be created
-   c. Critique proposed task plan and hierarchy - taking the following issues into condideration; user journey edge cases, data validation, component boundaries for page performance
-   d. Propose a QA testing plan for the user to follow
-3. Manual Revise Plan with Grill Me
-   a. use the /grill-me-with-docs skill to question the user and remove amiguity from the task scope
-4. Implement (auto efficiency model)
-   a. create a new worktree off of the current branch to isolate changes made
-   b. stick to the accepted plan and begin code implementation
-   c. once implementation is complete test changes using lint and formatting scripts in package.json
-5. Manual User Review
-   b. follow the QA testing plan and utilise the /grill-me skill to gain important and scoped feedback to the changes made
-   c. work through and stage git changes made when feature has been successfully implemented and verified by the user manually - ensure secrets are protected using .gitignore
-6. Feedback Loop (auto efficiency model)
-   a. maintain our project CONTEXT.md file with ubiquitous language terminology and concepts as we develop new features - ensure no secrets are included in .md files
-7. Documentation
-   a. ask the user whether you should generate a new feature document - if verified manually by the user utilise the skills in /.claude/skills/documentation/* to create visual diagrams mapping user/logic flow and database/class entity relationships
 
 Coding Standards:
 - never use any or unknown you MUST always infer types from a method result or a generate api sdk/types or package types
@@ -229,11 +208,28 @@ File Structure:
 - app (nextjs route navigation and path using file structure, page entry server logic)
 - components (localised component file structure with sub components grouped into hierarchical directories ie forms/CreateUserForm/sections/BasicSection/ and then each section has files for separation of concerns ui rendering, schema zod validation, hook for partial submissions)
 - data (server actions files with server side data fetching structure data/User/CreateUser with each model having a dal dto dpo file following a OOP class structure - specifically for server)
+```
 
-Branch Policy:
-- feature-
-- prototype-
-- test-
-- bugfix-
-- hotfix-
+## Cursor Plan Mode Steps
+
+```
+1. Start /caveman full
+2. Plan Context with Git Diff (high model - Sonnet 4.5 medium thinking disabled)
+   a. Scope out task taking in to consideration the users changes using git diff command
+   b. Propose a component hierarchy - and make sure to utilise existing components in the project or if a new reusable Presenter component needs to be created
+   c. Critique proposed task plan and hierarchy - taking the following issues into condideration; user journey edge cases, data validation, component boundaries for page performance
+   d. Propose a QA testing plan for the user to follow
+3. Manual Revise Plan with Grill Me
+   a. use the /grill-me-with-docs skill to question the user and remove amiguity from the task scope
+4. Implement (auto efficiency model - Composer 2.5)
+   a. create a new worktree off of the current branch to isolate changes made
+   b. stick to the accepted plan and begin code implementation
+   c. once implementation is complete test changes using lint and formatting scripts in package.json
+5. Manual User Review
+   b. follow the QA testing plan and utilise the /grill-me skill to gain important and scoped feedback to the changes made
+   c. work through and stage git changes made when feature has been successfully implemented and verified by the user manually - ensure secrets are protected using .gitignore
+6. Feedback Loop (auto efficiency model - Composer 2.5)
+   a. maintain our project CONTEXT.md file with ubiquitous language terminology and concepts as we develop new features - ensure no secrets are included in .md files
+7. Documentation
+   a. ask the user whether you should generate a new feature document - if verified manually by the user utilise the skills in /.claude/skills/documentation/* to create visual diagrams mapping user/logic flow and database/class entity relationships
 ```
