@@ -1,20 +1,25 @@
 ---
 name: generate-changelog
-description: "Hub deploy note — git diff master↔develop, new docs/releases file."
+description: "Generate deploy note — git diff master↔develop, semver from changes, release doc + package.json."
 agents:
   - cursor
 ---
 
-/caveman full
+/caveman ultra
 
-**Repo cockpit:** hub root. `docs/releases/` — **Titles** fixed below; still peek latest `0-2-*.md` for tone and bullet density.
+**Cockpit:** project root. `docs/releases/` — peek latest `*-*-*.md` for tone/density. Hub `package.json` `version` must match release.
 
-**Bind:** user gives filename **or** next patch from latest release file. Optional **baseline** commit on `origin/master` → also `git log` / `git diff` `<baseline>..origin/master` **plus** usual `origin/master..origin/develop`. **@Branch** → footer note branch name only; default diff still `master..develop` unless user overrides.
+**Bind:** optional user filename/version override. Optional **baseline** on `origin/master` → also `git log` / `git diff` `<baseline>..origin/master` + usual `origin/master..origin/develop`. Default diff `master..develop`.
 
-**Output:** new `docs/releases/<version>.md`. **Titles (exact, in order):** `# Deployment Notes` → `## ✨ New Features` → `## 🔧 Improvements` → `## 🐛 Bug Fixes` → `## 🔒 Technical Improvements`. Omit an `## …` block if empty. End file: italic one-line `_Preparation:_` (git ranges + deploy-branch caveat). British English, plain language, themes not raw paths.
+**Version:** read latest release + `package.json`. Infer bump from diff unless user overrides:
+- **patch** (third) — bug fixes, tweaks, refactors, tech-only, no new user-facing capability
+- **minor** (middle) — new features, new flows, non-breaking additions
+- **major** (first) — breaking changes, removed APIs, incompatible migrations/schema
 
-**Git:** `git fetch origin`; then `git diff --stat` + `git log --oneline` on `origin/master..origin/develop` (+ baseline range if given). Hub repo only.
+Filename dashes → semver dots: `0-2-16.md` → `0.2.16`.
 
-**Cavecrew:** `cavecrew-investigator` → `name-only` path prefix counts (both ranges if baseline). Main thread → prose. `cavecrew-builder` only if **single** output file; else skip. Optional `cavecrew-reviewer` on `.md`.
+**Output:**
+1. `docs/releases/<version>.md` — titles exact order: `# Deployment Notes` → `## ✨ New Features` → `## 🔧 Improvements` → `## 🐛 Bug Fixes` → `## 🔒 Technical Improvements`. Omit empty `##`. No footer. British English, themes not paths.
+2. Project root `package.json` — set `"version"` to matching semver. Only `version` key.
 
-**Handoff:** path + ranges used.
+**Git:** `git fetch origin`; `git diff --stat` + `git log --oneline` on `origin/master..origin/develop` (+ baseline if given).
