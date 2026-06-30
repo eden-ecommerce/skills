@@ -24,13 +24,13 @@ agents:
 
 ### 2. Consolidate reality
 - read actual diff vs `{feature}-master-plan.md`
-- read vs active `sub-plans/{step}-{task}-sub-plan.md`
+- read vs active `sub-plans/{step}-{task}-sub-plan.md` (not `sub-plans/completed/`)
 - document deviations + why
 
 ### 3. Sync master
 - rewrite master sections to reflect **actual** impl
 - check off completed sub row in Sub-Plan Orchestration
-- archive or delete obsolete `sub-plans/{step}-{task}-sub-plan.md` files
+- move completed `sub-plans/{step}-{task}-sub-plan.md` → `sub-plans/completed/{step}-{task}-sub-plan.md` (create `sub-plans/completed/` if missing)
 
 ### 4. Sync test-plan
 - tick automated rows in `test-plans/{step}-{task}-test-plan.md` if tests now exist
@@ -61,4 +61,5 @@ Update plan files in place. Append sync note to master:
 - deviations: ...
 - gates: pass
 - test-plan: automated N/M; manual open: ...
+- sub-plan: moved to sub-plans/completed/{step}-{task}-sub-plan.md
 ```
