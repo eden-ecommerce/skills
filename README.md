@@ -24,13 +24,20 @@ Choose **Global** when prompted. Reload Cursor (`Ctrl+Shift+P` → **Developer: 
 
 ## Orchestration skills
 
-Master/sub plan workflow. Plan files: `{feature}-{task}-{plan-type}-plan.md` in `docs/task/<feature-task-slug>/`.
+Master/sub plan workflow. Artefact root: `docs/feature/<feature>/`.
+
+```
+docs/feature/{feature}/
+  {feature}-master-plan.md
+  sub-plans/{step}-{task}-sub-plan.md
+  test-plans/{step}-{task}-test-plan.md
+```
 
 | Invoke | When | Output |
 |--------|------|--------|
-| `/construct-master-plan` | Task brief received | `{feature}-{task}-master-plan.md` |
-| `/construct-sub-plan` | Expand one prioritized sub | `{feature}-{subtask}-sub-plan.md` |
-| `/construct-test-plan` | Before Build — TDD specs + manual checklist | `{feature}-{task}-test-plan.md` |
+| `/construct-master-plan` | Task brief received | `{feature}-master-plan.md` |
+| `/construct-sub-plan` | Expand one prioritized sub | `sub-plans/{step}-{task}-sub-plan.md` |
+| `/construct-test-plan` | Before Build — TDD specs + manual checklist (per sub) | `test-plans/{step}-{task}-test-plan.md` |
 | `/handoff-plan` | Thread switch, unknowns | copy-paste HANDOFF block |
 | `/review-implementation` | After Build | audit report (`/ponytail-review`) |
 | `/sync-plan` | Sub complete | updated master + sync log (`/ponytail-audit`) |
@@ -53,8 +60,8 @@ All orchestration skills start `/caveman ultra`. Build uses `/ponytail` (per sub
 | 3 | **Slack List Thread** | Clarifications → **written sign-off** |
 | 4 | **Cursor Plan** | `/caveman ultra` → `/construct-master-plan` |
 | 5 | **Cursor Plan** | `/construct-sub-plan` per prioritized sub |
-| 6 | **Cursor Plan** | `/construct-test-plan` |
-| 7 | **Human** | Read + amend plans in `docs/task/<feature-task-slug>/` |
+| 6 | **Cursor Plan** | `/construct-test-plan` per sub |
+| 7 | **Human** | Read + amend plans in `docs/feature/<feature>/` |
 | 8 | **Cursor Build** | Agent + `/ponytail` from sub-plan Build block |
 | 9 | **Cursor Agent** | `/review-implementation` → `/sync-plan` |
 | 10 | **Human** | Tick manual test-plan rows; Gates green |

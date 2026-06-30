@@ -1,6 +1,6 @@
 ---
 name: construct-master-plan
-description: "SDLC req analysis + system design; self-research brief vs repo → blast radius → prioritized subs → unknowns; output {feature}-{task}-master-plan.md. Use when starting feature, task brief received, or master plan needed."
+description: "SDLC req analysis + system design; self-research brief vs repo → blast radius → prioritized subs → unknowns; output {feature}-master-plan.md. Use when starting feature, task brief received, or master plan needed."
 agents:
   - cursor
 ---
@@ -11,9 +11,18 @@ agents:
 
 **SDLC:** Requirement analysis + system design. **No code. No impl.**
 
-**Artefact path:** `docs/task/<feature-task-slug>/{feature}-{task}-master-plan.md`
+**Artefact root:** `docs/feature/<feature>/`
 
-**Naming:** derive kebab-case `feature` (product area) + `task` (ticket scope) from brief. Write both slugs in plan header — sub/test skills reuse prefix.
+```
+docs/feature/{feature}/
+  {feature}-master-plan.md
+  sub-plans/
+    {step}-{task}-sub-plan.md
+  test-plans/
+    {step}-{task}-test-plan.md
+```
+
+**Naming:** derive kebab-case `feature` (product area) from brief. Each sub row gets zero-padded `step` (`01`, `02`, …) + `task` slug (subtask scope). Write slugs in plan header — sub/test skills reuse them.
 
 **Input:** user brief. Human may paste prior ChatGPT output from `docs/task-refinement-prompt.md` — read only; do not invoke external skills.
 
@@ -35,13 +44,14 @@ agents:
 ### 3. Prioritize
 - break into logical subtasks
 - order by execution priority + deps between subs
-- each sub row must name `{subtask}` slug → `{feature}-{subtask}-sub-plan.md`
+- assign `step` (`01`…`99`) in execution order
+- each sub row → `sub-plans/{step}-{task}-sub-plan.md`
 
 ### 4. System design
 - technical limits, platform constraints
 - unknowns — block sub-plans until answered
 - edge-case **categories** (not full test matrix)
-- test categories pointer → `/construct-test-plan` later
+- test categories pointer → `/construct-test-plan` per sub later
 
 ### 5. Impact
 - migration / rollout risks
@@ -65,7 +75,7 @@ agents:
 
 ## Output template
 
-Write file `{feature}-{task}-master-plan.md`:
+Create dirs `sub-plans/` + `test-plans/` if missing. Write file `{feature}-master-plan.md`:
 
 ```md
 # {Feature Title}
@@ -73,8 +83,9 @@ Write file `{feature}-{task}-master-plan.md`:
 | Slug | Value |
 |------|-------|
 | feature | {feature} |
-| task | {task} |
-| artefact_dir | docs/task/{feature-task-slug}/ |
+| artefact_dir | docs/feature/{feature}/ |
+| sub_plans_dir | sub-plans/ |
+| test_plans_dir | test-plans/ |
 
 ## Context
 <!-- SQL snippets, file paths, env var names — NO secrets -->
@@ -86,12 +97,13 @@ Write file `{feature}-{task}-master-plan.md`:
 <!-- files read, grep hits, what inferred vs verified -->
 
 ## Sub-Plan Orchestration
-- [ ] {subtask-slug} — {one-line description} → `{feature}-{subtask-slug}-sub-plan.md`
+- [ ] 01 — {task-slug} — {one-line description} → `sub-plans/01-{task-slug}-sub-plan.md`
+- [ ] 02 — {task-slug} — {one-line description} → `sub-plans/02-{task-slug}-sub-plan.md`
 - [ ] ...
 
 ## Unknowns
 <!-- block sub-plans until resolved; who to ask -->
 
 ## Test Categories
-<!-- unit / integration / manual areas — detail in test-plan -->
+<!-- unit / integration / manual areas — detail in per-sub test-plans -->
 ```

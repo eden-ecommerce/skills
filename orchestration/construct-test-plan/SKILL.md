@@ -1,19 +1,19 @@
 ---
 name: construct-test-plan
-description: "SDLC test design pre-Build; edge cases + /tdd specs (no impl bias) + manual tick checklist; output {feature}-{task}-test-plan.md. Use before Cursor Build when test plan missing or stale."
+description: "SDLC test design pre-Build; edge cases + /tdd specs (no impl bias) + manual tick checklist; output test-plans/{step}-{task}-test-plan.md per sub. Use before Cursor Build when test plan missing or stale."
 agents:
   - cursor
 ---
 
 /caveman ultra
 
-**Bind:** `.cursor/STRUCTURE.md` + `.cursor/CONTEXT.md`. Read slugs from master plan header.
+**Bind:** `.cursor/STRUCTURE.md` + `.cursor/CONTEXT.md`. Read slugs from master plan header + active sub-plan.
 
-**SDLC:** Test design **before Build** — unbiased by impl code or diff.
+**SDLC:** Test design **before Build** — unbiased by impl code or diff. **One test-plan per sub-plan.**
 
-**Artefact path:** `docs/task/<feature-task-slug>/{feature}-{task}-test-plan.md`
+**Artefact path:** `docs/feature/<feature>/test-plans/{step}-{task}-test-plan.md`
 
-**Input:** brief + `{feature}-{task}-master-plan.md` + active `{feature}-{subtask}-sub-plan.md`.
+**Input:** brief + `{feature}-master-plan.md` + active `sub-plans/{step}-{task}-sub-plan.md`.
 
 **Do not:** read impl diff, open production files written for this task, invoke execute-test skill.
 
@@ -57,17 +57,18 @@ User runs automated tests via Gates during/after Build; ticks manual `[ ]` rows 
 
 ## Output template
 
-Write file `{feature}-{task}-test-plan.md`:
+Write file `test-plans/{step}-{task}-test-plan.md`:
 
 ```md
-# Test Plan — {feature}-{task}
+# Test Plan — {step}-{task}
 
 | Slug | Value |
 |------|-------|
 | feature | {feature} |
+| step | {step} |
 | task | {task} |
-| master | {feature}-{task}-master-plan.md |
-| sub | {feature}-{subtask}-sub-plan.md |
+| master | {feature}-master-plan.md |
+| sub | sub-plans/{step}-{task}-sub-plan.md |
 
 ## Edge Cases
 1. ...

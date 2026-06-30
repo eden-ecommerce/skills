@@ -11,7 +11,7 @@ agents:
 
 **SDLC:** Reconcile plan truth after Build. Sub-plan execution complete for current slice.
 
-**Input:** green review + git diff + plan artefacts in `docs/task/<feature-task-slug>/`.
+**Input:** green review + git diff + plan artefacts in `docs/feature/<feature>/`.
 
 ---
 
@@ -23,17 +23,17 @@ agents:
 - all must pass before sync
 
 ### 2. Consolidate reality
-- read actual diff vs `{feature}-{task}-master-plan.md`
-- read vs active `{feature}-{subtask}-sub-plan.md`
+- read actual diff vs `{feature}-master-plan.md`
+- read vs active `sub-plans/{step}-{task}-sub-plan.md`
 - document deviations + why
 
 ### 3. Sync master
 - rewrite master sections to reflect **actual** impl
 - check off completed sub row in Sub-Plan Orchestration
-- archive or delete obsolete `{feature}-{subtask}-sub-plan.md` files
+- archive or delete obsolete `sub-plans/{step}-{task}-sub-plan.md` files
 
 ### 4. Sync test-plan
-- tick automated rows in `{feature}-{task}-test-plan.md` if tests now exist
+- tick automated rows in `test-plans/{step}-{task}-test-plan.md` if tests now exist
 - note manual rows still open for human
 
 ---
@@ -57,7 +57,7 @@ Update plan files in place. Append sync note to master:
 
 ```md
 ## Sync Log
-### {date} — {feature}-{subtask}
+### {date} — {step}-{task}
 - deviations: ...
 - gates: pass
 - test-plan: automated N/M; manual open: ...

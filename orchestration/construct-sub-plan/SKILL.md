@@ -1,19 +1,19 @@
 ---
 name: construct-sub-plan
-description: "SDLC subtask design; one master sub row → self-research repo → Build-ready scaffold + TDD outline; output {feature}-{subtask}-sub-plan.md. Use when expanding prioritized sub from master plan."
+description: "SDLC subtask design; one master sub row → self-research repo → Build-ready scaffold + TDD outline; output sub-plans/{step}-{task}-sub-plan.md. Use when expanding prioritized sub from master plan."
 agents:
   - cursor
 ---
 
 /caveman ultra
 
-**Bind:** `.cursor/STRUCTURE.md` + `.cursor/CONTEXT.md`. Read `{feature}-{task}-master-plan.md` from artefact dir in master header.
+**Bind:** `.cursor/STRUCTURE.md` + `.cursor/CONTEXT.md`. Read `{feature}-master-plan.md` from artefact dir in master header.
 
 **SDLC:** Subtask refinement → **Build-ready plan**. **No code.**
 
-**Artefact path:** `docs/task/<feature-task-slug>/{feature}-{subtask}-sub-plan.md`
+**Artefact path:** `docs/feature/<feature>/sub-plans/{step}-{task}-sub-plan.md`
 
-**Input:** one unchecked row from master Sub-Plan Orchestration — read `feature` slug + `{subtask}` slug from row.
+**Input:** one unchecked row from master Sub-Plan Orchestration — read `feature`, `step`, `task` slugs from row.
 
 ---
 
@@ -61,14 +61,14 @@ agents:
 
 ## Next
 
-`/construct-test-plan` if `{feature}-{task}-test-plan.md` missing or stale.
+`/construct-test-plan` if `test-plans/{step}-{task}-test-plan.md` missing or stale.
 Else human amend → **Build**.
 
 ---
 
 ## Output template
 
-Write file `{feature}-{subtask}-sub-plan.md`:
+Write file `sub-plans/{step}-{task}-sub-plan.md`:
 
 ```md
 # {Subtask Title}
@@ -76,8 +76,10 @@ Write file `{feature}-{subtask}-sub-plan.md`:
 | Slug | Value |
 |------|-------|
 | feature | {feature} |
-| subtask | {subtask} |
-| master | {feature}-{task}-master-plan.md |
+| step | {step} |
+| task | {task} |
+| master | {feature}-master-plan.md |
+| test_plan | test-plans/{step}-{task}-test-plan.md |
 
 ## Goal
 <!-- one paragraph -->

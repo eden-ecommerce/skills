@@ -11,7 +11,7 @@ agents:
 
 **SDLC:** Post-Build quality gate — pre-sync. **No auto-fix** unless user asks.
 
-**Input:** git diff + `{feature}-{task}-master-plan.md` + active `{feature}-{subtask}-sub-plan.md`.
+**Input:** git diff + `{feature}-master-plan.md` + active `sub-plans/{step}-{task}-sub-plan.md`.
 
 ---
 
@@ -60,7 +60,7 @@ agents:
 ## Output template
 
 ```md
-# Review — {feature}-{subtask}
+# Review — {step}-{task}
 
 ## Ponytail Review
 <!-- one-line findings -->

@@ -12,8 +12,8 @@ agents:
 **SDLC:** Deployment / merge request. All subs checked off in master.
 
 **Input:**
-- reconciled `{feature}-{task}-master-plan.md`
-- `{feature}-{task}-test-plan.md` tick summary
+- reconciled `{feature}-master-plan.md`
+- all `test-plans/{step}-{task}-test-plan.md` tick summaries
 - green STRUCTURE **Gates**
 - git diff (final)
 
@@ -23,11 +23,12 @@ agents:
 
 ### 1. Read truth
 - master plan = source for Summary + Architecture
-- test-plan Pass Criteria + ticked rows = Verification Proof
+- aggregate Pass Criteria + ticked rows from all test-plans = Verification Proof
 - diff confirms files match master Research Notes
 
 ### 2. Cleanup note
-- list abandoned `{feature}-{subtask}-sub-plan.md` files removed
+- list abandoned `sub-plans/{step}-{task}-sub-plan.md` files removed
+- list obsolete `test-plans/{step}-{task}-test-plan.md` files removed
 - incomplete plans deleted from artefact dir
 
 ### 3. Write MR body
@@ -45,13 +46,15 @@ agents:
 <!-- bullets: structural updates, DB, API — from master + diff -->
 
 ## Verification Proof
-<!-- from test-plan: automated pass, manual ticks, gates run -->
+<!-- from all test-plans: automated pass, manual ticks, gates run -->
 
 ## Maintenance
 <!-- Sentry, Vercel, DB CPU, alerts — from master Impact -->
 
 ## Plan Artefacts
-- master: docs/task/{feature-task-slug}/{feature}-{task}-master-plan.md
+- master: docs/feature/{feature}/{feature}-master-plan.md
+- sub-plans: docs/feature/{feature}/sub-plans/
+- test-plans: docs/feature/{feature}/test-plans/
 - abandoned plans removed: ...
 ```
 

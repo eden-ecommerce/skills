@@ -2,12 +2,21 @@
 
 Plan mode + orchestration skills. See [software-development-lifecycle.md](software-development-lifecycle.md).
 
+## Artefact layout
+
+```
+docs/feature/{feature}/
+  {feature}-master-plan.md
+  sub-plans/{step}-{task}-sub-plan.md
+  test-plans/{step}-{task}-test-plan.md
+```
+
 ## Steps
 
 1. `/caveman ultra`
-2. `/construct-master-plan` → `docs/task/<feature-task-slug>/{feature}-{task}-master-plan.md`
-3. `/construct-sub-plan` per prioritized unchecked sub → `{feature}-{subtask}-sub-plan.md`
-4. `/construct-test-plan` → `{feature}-{task}-test-plan.md`
+2. `/construct-master-plan` → `docs/feature/<feature>/{feature}-master-plan.md`
+3. `/construct-sub-plan` per prioritized unchecked sub → `sub-plans/{step}-{task}-sub-plan.md`
+4. `/construct-test-plan` per sub → `test-plans/{step}-{task}-test-plan.md`
 5. Human read + amend all plans
 6. **Build** (Agent) — sub-plan Build block: `/caveman ultra` + `/ponytail`
 7. `/review-implementation` — `/ponytail-review` on diff

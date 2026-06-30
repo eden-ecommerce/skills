@@ -7,7 +7,7 @@ agents:
 
 /caveman ultra
 
-**Bind:** `.cursor/STRUCTURE.md` + `.cursor/CONTEXT.md`. Read all plan artefacts in `docs/task/<feature-task-slug>/`.
+**Bind:** `.cursor/STRUCTURE.md` + `.cursor/CONTEXT.md`. Read all plan artefacts in `docs/feature/<feature>/`.
 
 **SDLC:** Preserve context across thread switch. **No code.**
 
@@ -17,10 +17,10 @@ agents:
 
 ## Extract
 
-1. **Slugs** — feature, task, subtask from master header
-2. **Master status** — `{feature}-{task}-master-plan.md` done vs pending subs
-3. **Active sub** — `{feature}-{subtask}-sub-plan.md` path + Goal one-liner
-4. **Test-plan** — `{feature}-{task}-test-plan.md` approved? manual ticks open?
+1. **Slugs** — feature, step, task from master header + active sub row
+2. **Master status** — `{feature}-master-plan.md` done vs pending subs
+3. **Active sub** — `sub-plans/{step}-{task}-sub-plan.md` path + Goal one-liner
+4. **Test-plan** — `test-plans/{step}-{task}-test-plan.md` approved? manual ticks open?
 5. **Architecture** — file paths, DB tables, API routes from plans (no secrets)
 6. **Last gates** — pass/fail + command output summary if failed
 7. **Next action** — exact step: skill invoke, amend file, or Build
@@ -32,22 +32,22 @@ agents:
 Single copy-paste block only:
 
 ```md
-## HANDOFF — {feature}-{task}
+## HANDOFF — {feature} / {step}-{task}
 
 ### Slugs
 - feature: {feature}
+- step: {step}
 - task: {task}
-- active_subtask: {subtask}
 
-### Master ({feature}-{task}-master-plan.md)
+### Master ({feature}-master-plan.md)
 - done: [x] ...
 - pending: [ ] ...
 
-### Active Sub ({feature}-{subtask}-sub-plan.md)
+### Active Sub (sub-plans/{step}-{task}-sub-plan.md)
 - goal: ...
 - blocking: none | ...
 
-### Test Plan ({feature}-{task}-test-plan.md)
+### Test Plan (test-plans/{step}-{task}-test-plan.md)
 - approved: yes/no
 - manual open: N rows
 
@@ -59,5 +59,5 @@ Single copy-paste block only:
 - last run: pass/fail — ...
 
 ### NEXT (run this first)
-→ {exact command: e.g. /construct-sub-plan for {subtask} | amend {file} | Build from {sub-plan path}}
+→ {exact command: e.g. /construct-sub-plan for {step}-{task} | amend {file} | Build from sub-plans/{step}-{task}-sub-plan.md}
 ```

@@ -7,7 +7,7 @@ Copy into target repo root. Adjust per project.
 - you MUST use `/caveman ultra`
 - Cursor Build: you MUST use `/ponytail`
 - post-Build review: `/ponytail-review`; milestone sync: `/ponytail-audit`
-- follow active sub-plan: `docs/task/<feature-task-slug>/{feature}-{subtask}-sub-plan.md`
+- follow active sub-plan: `docs/feature/<feature>/sub-plans/{step}-{task}-sub-plan.md`
 - run project scripts via `pnpm` in correct docker container (per STRUCTURE)
 - styling: tailwindcss — tailwind-merge, tailwind-variants
 - network requests: react query hook files
