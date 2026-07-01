@@ -23,7 +23,7 @@ agents:
 
 ## Output schema (MUST follow — exact 3 parts)
 
-### Answers to [Name]'s Questions / Clarifications
+### Answers to Questions / Clarifications
 - max 2 sentences per Q — plain English, technical reasoning
 - shape/config/URL change → inline contrast:
   * Legacy/Before: [Original Shape] -> Clean/After: [New Shape]
@@ -57,7 +57,7 @@ Step 2: [Phase Name]
 **In:** "Simplify backend routing restructure for PM — why split user table, how deploy, ask tier-1 vs tier-2 default for new users."
 
 **Out:**
-### Answers to Sarah's Questions
+### Answers to Questions / Clarifications
 We are splitting the user table to isolate authentication data from profile metadata. This prevents performance bottlenecks during high-traffic login periods.
 * Legacy: Single massive users table -> Clean: Auth credentials table + Profile metadata table
 
