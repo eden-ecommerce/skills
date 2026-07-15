@@ -45,6 +45,16 @@ docs/feature/{feature}/
 
 All orchestration skills start `/caveman ultra`. Build uses `/ponytail` (per sub-plan Build block).
 
+## Blueprint skills
+
+End-to-end implementation playbooks. Invoke directly in Cursor Agent — no SDLC artefact required.
+
+| Invoke | When |
+|--------|------|
+| `/add-publisher-panel` | New `publisher*` panel across API, hub, UI, Storybook, storefront (`panelProducts`) |
+
+Path: [`blueprints/add-publisher-panel/`](blueprints/add-publisher-panel/). Starts `/caveman ultra`. Wireframe gate before code.
+
 ## Optional skills (not orchestration deps)
 
 **Documentation** (`documentation/`): `/document-current-state`, `/document-database`, `/document-flow`, `/generate-changelog`, `/refine-rules`, `/generate-handoff-doc` — invoke separately when needed.
