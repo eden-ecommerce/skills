@@ -1,39 +1,35 @@
 ---
 name: fetch-product-sanity-panels
-description: HUNT PRODUCT PANELS IN EDEN CMS SCHEMA. USE WHEN NEED KNOW HOW PRODUCT DOCUMENT BUILT. EXTRACT SCHEMAS FOR FEATURED ORGANISATIONS, JOBS, EVENTS, AND BUTTONS.
+description: Fetch Eden CMS product panel schemas and map gallery titles to types. Use when need panel field shapes or visual-to-schema mapping.
 ---
 
-# HUNT PRODUCT PANELS
+# SCHEMA + GALLERY
 
-MANUS WANT PRODUCT SCHEMA? MANUS USE THIS.
+## SCHEMA
 
-## WHY USE?
-*   NEED KNOW WHAT PANELS INSIDE PRODUCT.
-*   NEED SEE FULL JSON SCHEMA FOR EVERY PANEL TYPE.
-*   EDEN CMS CHANGE? THIS FIND TRUTH.
+```bash
+curl -s https://cms.eden.co.uk/schema.json -o schema.json
+python3 scripts/extract_panels.py schema.json
+```
 
-## HOW HUNT (THE STEPS)
+Output: full JSON schema per `product.panels` union member.
 
-### 1. GET BIG JSON MAP
-*   MANUS GO URL: `https://cms.eden.co.uk/schema.json`
-*   USE `curl` OR `browser`. SAVE TO `schema.json`.
+## GALLERY
 
-### 2. RUN MAGIC SCRIPT
-*   USE SCRIPT IN THIS SKILL: `/home/ubuntu/skills/fetch-product-sanity-panels/scripts/extract_panels.py`
-*   COMMAND: `python3 /home/ubuntu/skills/fetch-product-sanity-panels/scripts/extract_panels.py schema.json`
+Open `https://eden-xi.vercel.app/panels/product`.
 
-### 3. SEE WHAT FOUND
-*   SCRIPT FIND `product` DOCUMENT.
-*   SCRIPT FIND `panels` LIST.
-*   SCRIPT GRAB FULL SCHEMA FOR ALL PANELS IN UNION.
+Per panel on page:
 
-## CAVE MAN LOGIC (FOR SCRIPT)
-*   FIND ITEM WHERE `name` IS "product" AND `type` IS "document".
-*   LOOK IN `attributes` FOR `panels`.
-*   `panels` IS `union`. FOLLOW `of` -> `of` TO FIND NAMES.
-*   FOR EVERY NAME, FIND ITEM WHERE `name` MATCH AND `type` IS "type".
-*   GIVE ALL TO USER.
+1. Note rendered title/label
+2. Check responsive layout (mobile + desktop)
+3. Note variant options if shown
+4. Map title → `_type` from schema extract
+5. Read schema `description` + fields for intent
 
-## TROUBLE?
-*   IF NO `product`? SCHEMA CHANGE. MANUS MUST `grep` FOR "product" TO FIND NEW PATH.
-*   IF NO `panels`? LOOK FOR OTHER ATTRIBUTE NAME.
+Build map: `{ title, _type, intent, requiredFields }`.
+
+## TROUBLE
+
+- No `product` doc in schema → `grep '"name": "product"' schema.json`
+- No `panels` attr → grep product attributes for union field
+- Gallery title ≠ schema name → match by visual + description, not string equality

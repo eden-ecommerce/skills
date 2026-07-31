@@ -1,38 +1,27 @@
 ---
 name: fetch-product-data-from-algolia
-description: HUNT PRODUCT DATA IN ALGOLIA. USE WHEN NEED LIVE PRODUCT INFO LIKE PRICE, NAME, STOCK. FILTERS FOR EDEN STORE AND PRODUCT ID.
+description: Fetch live Eden product from Algolia by product ID. Use when need price, stock, categories, author, images.
 ---
 
-# HUNT ALGOLIA PRODUCT
+# ALGOLIA PRODUCT
 
-MANUS WANT LIVE PRODUCT INFO? MANUS USE THIS.
+## ENV
 
-## WHY USE?
-*   NEED KNOW CURRENT PRICE.
-*   NEED KNOW IF PRODUCT IN STOCK.
-*   NEED SEE CATEGORIES AND TAGS FROM ALGOLIA.
+`ALGOLIA_APP_ID`, `ALGOLIA_SEARCH_KEY`
 
-## HOW HUNT (THE STEPS)
+## RUN
 
-### 1. HAVE SECRET KEYS
-*   MANUS NEED `ALGOLIA_APP_ID` AND `ALGOLIA_SEARCH_KEY` IN ENVIRONMENT.
+```bash
+python3 scripts/fetch_algolia.py <PRODUCT_ID>
+```
 
-### 2. RUN MAGIC SCRIPT
-*   USE SCRIPT IN THIS SKILL: `/home/ubuntu/skills/fetch-product-data-from-algolia/scripts/fetch_algolia.py`
-*   COMMAND: `python3 /home/ubuntu/skills/fetch-product-data-from-algolia/scripts/fetch_algolia.py <PRODUCT_ID>`
+Index `products`. Filter `product_id:<ID> AND stores:eden`.
 
-### 3. SEE WHAT FOUND
-*   SCRIPT SEARCH `products` INDEX.
-*   SCRIPT USE FILTERS: `product_id:<ID> AND stores:eden`.
-*   SCRIPT SHOW BIG JSON WITH ALL INFO.
+## OUTPUT
 
-## CAVE MAN LOGIC
-*   SEND POST REQUEST TO ALGOLIA API.
-*   USE HEADERS WITH APP ID AND KEY.
-*   ASK FOR SPECIFIC PRODUCT ID IN EDEN STORE.
-*   GIVE JSON BACK TO MANUS.
+JSON hit: title, price, author, ISBN, categories, series, related products, images, stock.
 
-## TROUBLE?
-*   NO INFO? MAYBE PRODUCT ID WRONG.
-*   NO INFO? MAYBE NOT IN EDEN STORE.
-*   AUTH ERROR? CHECK SECRET KEYS.
+## TROUBLE
+
+- Empty → wrong ID or not in Eden store
+- Auth error → check env keys

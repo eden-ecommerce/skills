@@ -1,41 +1,33 @@
 ---
 name: view-product-preview-in-sanity
-description: LOOK AT PRODUCT PREVIEW PAGE. USE WHEN NEED SEE VISUAL CHANGES ON EDEN WEBSITE. NEED PREVIEW TOKEN AND PRODUCT SLUG.
+description: Preview Eden product draft on vercel and verify vs page plan. Use after draft patch, before publish.
 ---
 
-# LOOK AT PRODUCT PREVIEW
+# PREVIEW VERIFY
 
-MANUS WANT SEE PAGE? MANUS USE THIS.
+## URL
 
-## WHY USE?
-*   NEED SEE IF PANELS LOOK GOOD.
-*   NEED CHECK IF DATA FROM SANITY SHOW ON PAGE.
-*   NEED VERIFY PREVIEW BEFORE PUBLISH.
+```
+https://eden-xi.vercel.app/api/preview?type=product&token=<TOKEN>&slug=<PRODUCT_ID>
+```
 
-## HOW LOOK (THE STEPS)
+Token from user. Never log or commit.
 
-### 1. GET PREVIEW URL
-*   BASE URL: `https://eden-xi.vercel.app/api/preview`
-*   MANUS NEED:
-    *   `type=product`
-    *   `token=<PREVIEW_TOKEN>`
-    *   `slug=<PRODUCT_ID>`
+## CHECK
 
-### 2. USE BROWSER
-*   MANUS GO TO URL: `https://eden-xi.vercel.app/api/preview?type=product&token=<TOKEN>&slug=<PRODUCT_ID>`
-*   USE `browser_navigate`.
+1. `browser_navigate` to URL
+2. Scroll full page
+3. Compare vs page plan from step 3:
+   - Panel order and types
+   - Content accuracy
+   - Images render
+   - Responsive layout
+4. Name/price match Algolia
 
-### 3. SEE WHAT THERE
-*   LOOK AT SCREENSHOT.
-*   SCROLL DOWN TO SEE ALL PANELS.
-*   CHECK IF PRODUCT NAME AND PRICE MATCH ALGOLIA.
+Mismatch → patch draft → re-preview.
 
-## CAVE MAN LOGIC
-*   BUILD URL WITH TOKEN AND ID.
-*   OPEN BROWSER.
-*   TELL USER IF PAGE LOOK RIGHT.
+## TROUBLE
 
-## TROUBLE?
-*   PAGE NOT LOAD? TOKEN EXPIRED.
-*   WRONG PRODUCT? CHECK SLUG/ID.
-*   NO PANELS? CHECK SANITY DOCUMENT.
+- Blank page → expired token
+- Wrong product → check slug/ID
+- Missing panels → check draft doc `panels` array
