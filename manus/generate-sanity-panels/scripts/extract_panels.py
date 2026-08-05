@@ -1,6 +1,6 @@
 import json
-import sys
 import os
+import sys
 
 
 def extract_document_panels(schema_path, doc_name, field_name="panels"):
@@ -15,14 +15,12 @@ def extract_document_panels(schema_path, doc_name, field_name="panels"):
         (item for item in schema if item.get("name") == doc_name and item.get("type") == "document"),
         None,
     )
-
     if not doc:
         print(f"Document '{doc_name}' not found")
         return None
 
     attributes = doc.get("attributes", {})
     panels_attr = attributes.get(field_name, {})
-
     if not panels_attr:
         print(f"No '{field_name}' attribute on document '{doc_name}'")
         return None

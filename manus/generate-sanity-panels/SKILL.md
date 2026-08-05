@@ -1,115 +1,112 @@
 ---
 name: generate-sanity-panels
-description: Build Sanity panel drafts for Eden page types. Open research, persona-scored design, user feedback gates, entity gallery, draft, preview. Product, home, browse, article, hub, organisation.
+description: Orchestrates content-first Sanity panel drafts via 9 subagent stages with user gates. Product, article, email. Domain + target swappable prompts. Use when building Sanity panel pages, blog articles, product content strips, or email slices from a brief.
 ---
 
 # GENERATE SANITY PANELS
 
+Thin orchestrator. One subagent per stage. Orchestrator validates artifacts + runs gates only.
+
 ## HARD RULES
 
-- Draft only (`_id` prefix `drafts.`). Publish only after explicit user yes.
-- No Storybook. No Studio `previewUrl`.
-- Panel images → Sanity assets only. No external URLs in final draft.
-- Preview token sensitive. Never log or commit.
-- Three user feedback gates mandatory (see FLOW). No silent draft→publish.
+- Draft only (`_id` prefix `drafts.`). Publish after explicit user yes.
+- Never preview on `www.eden.co.uk`. Use `{NEXT_NEXT_EDEN_BASE_URL}` from env.
+- **Generated or custom panel art = Sanity assets.** Catalogue product imagery = picker IDs or CDN URL per schema — never duplicate catalogue covers into Sanity when picker resolves them.
+- Max 2 identical panel `_type` on one page. Prefer distinct layout jobs over same-family variants.
+- Never use `markdown` panel `_type`.
+- Nine user gates. No silent draft to publish.
+- One subagent per stage. No agent does research + draft + publish.
+- Max 2 ref files per stage. Stages 2–9 use `domainSnapshot` from artifact, not re-read domain file.
+- **Reader-facing copy:** human labels + links only — never raw internal IDs (`productId`, SKU codes, Sanity `_id`) in panel body/FAQ/CTA text.
 
 ## ENV
 
-Load `scripts/.env` for local scripts. See `scripts/.env.example`.
+`set -a && source scripts/.env && set +a` — see `scripts/.env.example`, [constants/urls.md](constants/urls.md).
 
-| Var | Use |
+Sanity `NEXT_PUBLIC_SANITY_PROJECT_ID` / `NEXT_PUBLIC_SANITY_DATASET` via `manus-mcp-cli` MCP auth.
+
+## FIRST RUN — PROJECT OUTLINE
+
+Before any stage, clarify the three required definitions. Do not spawn Definition until all three are set. This outline drives every later stage.
+
+| Definition | What | How to resolve |
+|---|---|---|
+| **target** | What we are building | Load `constants/targets/_index.md`. Ask user if missing. |
+| **brief** | What the content is about | Ask user for a short narrative brief. |
+| **domain** | Whose brand / catalogue / CMS | Load `constants/domains/_index.md`. Ask user if missing. |
+
+Confirm aloud as the project outline, then collect **target requirements** from the chosen target file:
+
+| target | Extra requirements |
 |---|---|
-| `ALGOLIA_APP_ID` / `ALGOLIA_SEARCH_KEY` | `fetch_algolia.py` |
-| `NEXT_NEXT_EDEN_BASE_URL` | Gallery + preview base (next-next-eden) |
-| `EDEN_BLOG_BASE_URL` | Article gallery base (eden-blog) |
-| `SANITY_PREVIEW_TOKEN` | `/api/preview` draft URLs |
+| `product` | **`productId`** (Eden `product_id`) — required. Block until provided. |
+| `article` | None — narrative brief is enough. |
+| `email` | None — narrative brief is enough. |
 
-Sanity project `bct7esy7`, dataset `eden` — MCP auth, not `.env`.
+If `domain.requiresTenantBrief` → also collect `tenantBrief` before Definition.
 
-## FLOW
+Only then proceed to Stage 1.
 
-### 0 — CLARIFY TARGET + PERSONAS
+## LOAD PROTOCOL
 
-If user did not state target, ask. Collect inputs per target.
+| When | Load |
+|---|---|
+| Domain pick | `constants/domains/_index.md` |
+| Domain chosen | one `constants/domains/{id}.md` once at Definition |
+| Target pick | `constants/targets/_index.md` |
+| Target chosen | one `constants/targets/{T}.md` + stage ref |
+| Stage N | `references/{N}-*/shared.md` + `{T}.md` if exists + prior artifact JSON path |
 
-→ [targets.md](references/targets.md)
+Forbidden: all domains, all targets, unrelated stage refs.
 
-Identify **2–4 personas** (shopper, gift buyer, church buyer, org visitor, SEO reader, etc.). State jobs-to-be-done and what “good” looks like per persona.
+## ORCHESTRATION
 
-### 1 — GATHER DATA
+Each stage:
 
-Seed from Algolia, Eden API, existing Sanity doc, public web.
+1. Spawn `Task` `generalPurpose` with stage ref paths + artifact JSON path + output contract
+2. Validate required keys on artifact file under `scripts/.artifacts/{runId}/`
+3. Gate: show condensed summary; block until user approves or gives `userFeedback`
+   - **Gate 5 special:** present a **wireframe mockup** (layout kind, purpose, image src intent, final title/body, CTA + URL per block) — see `references/5-desired-content/shared.md` Gate presentation. Do not ship a block-id table alone.
+   - **Gate 8 special:** present Audit **checklist table** (id / pass|fail / evidence) — see `references/8-audit/shared.md`. No pass summary without preview evidence.
+4. Reject: re-run same stage with feedback. Audit fail: restart Definition with `auditFlags`
+
+### Stage map
+
+| # | Stage | Ref | Out artifact |
+|---|---|---|---|
+| 1 | Definition | `references/1-definition/` | `definitionBundle`, `domainSnapshot`, `template` |
+| 2 | Personas | `references/2-personas/` | `personas[]` |
+| 3 | Research Strategy | `references/3-research-strategy/` | `topics[]` |
+| 4 | Research Findings | `references/4-research-findings/` | `findings[]`, `products[]` |
+| 5 | Desired Content | `references/5-desired-content/` | `desiredPageContent` (copy + imageIntent/safeZones; no motionIntent) |
+| 6 | Media | `references/6-media/` | `pageWithMedia` (`imageBrief[]` locked type+dims; generate custom art only) |
+| 7 | Draft | `references/7-draft/` | `draftPatch`, `previewUrl`, `panelsUsed[]` |
+| 8 | Audit | `references/8-audit/` | `auditResult` (mandatory preview + checklist) |
+| 9 | Publish | `references/9-publish/` | `publishedId` |
+
+Gate after every stage. Audit fail → Definition.
+
+### Token budget
+
+- Schema: `scripts/.cache/*-panels.json` allowlist only — never full `schema.json` in prompt
+- Algolia: subagent summarizes to product cards (incl. stock/fulfillment for gate/selection); raw JSON stays on disk in `findings-raw/` (debug only — orchestrator never reloads after merge); **never render price/stock/dispatch in panel copy**
+- Social proof research: keep source choice open — do not prescribe named retailers/review sites as layout models
+- Findings: fixed small schema per topic agent + `contentRelevance`; no live-page chrome-duplicate specs
+- Maker = author or manufacturer by product type
+- Handoff = artifact path + one-line summary
+- Stage 5: no `motionIntent`; `blocks[]` only (no parallel top-level `faq[]`); full content mockup at Gate 5; format siblings = text-led chooser
+- Stage 6: Phase A locks `targetPanelType` + `dimensions`; crop to target pixels before upload; catalogue = picker IDs (no cover upload); generated filenames `{target}-{id|slug}__{role}__{desc}`
+- Stage 7: fill schema-required fields; honor Media lock; single canonical `draftPatch` + `draftResult`
+- Stage 8: mandatory browser preview + deterministic checklist — Audit loads `draftPatch` + `pageWithMedia` path, not full schema
+
+## SCRIPTS
 
 ```bash
-python3 scripts/fetch_algolia.py <PRODUCT_ID>
+python3 scripts/fetch_algolia.py <product_id>
+python3 scripts/fetch_algolia.py --filter 'author:"Name" AND stores:eden' --query ""
+bash scripts/fetch_schema.sh
 ```
 
-→ [2-gather-data.md](references/2-gather-data.md)
+Sanity I/O: `manus-mcp-cli` — see `references/7-draft/mcp-sanity.md`.
 
-### 2 — RESEARCH (open-ended)
-
-Deep/wide research before any panel typing. You choose topics and depth.
-
-Start from gathered data. Expand wherever it strengthens the page — author, publisher, category story, FAQs, related catalogue, official assets, competitors, SEO intent, engagement hooks.
-
-Stop when you can sketch the full page with confidence. No fixed checklist.
-
-### 3 — DESIGN + SCORE
-
-Design ideal page **before** panels. Narrative flow, not panel catalogue order.
-
-Per section: purpose, copy angle, assets, SEO value. Score each candidate 0–5 on:
-
-- Persona fit (per persona, then mean)
-- SEO / discoverability
-- Engagement
-- Clarity / trust
-- Feasibility (gallery `_type` exists + assets available)
-
-Rank. Drop weak filler. Show ranked table to user.
-
-**GATE 1:** User confirms narrative, personas, ranked sections (or edits weights / drops sections). Do not proceed without approval.
-
-### 4 — GALLERY + SCHEMA
-
-Fetch entity gallery (one URL per target):
-
-| Target | Gallery URL |
-|---|---|
-| article | `{EDEN_BLOG_BASE_URL}/panels/article` |
-| product, home, category, department, hub, organisation | `{NEXT_NEXT_EDEN_BASE_URL}/panels/{entity}` |
-
-Parse `#panel-catalogue` JSON from page. Scroll samples for layout intent.
-
-Schema:
-
-```bash
-curl -s https://cms.eden.co.uk/schema.json -o schema.json
-python3 scripts/extract_panels.py schema.json <docName> [fieldName]
-```
-
-→ [1-schema-and-gallery.md](references/1-schema-and-gallery.md)
-
-### 5 — FIT
-
-Map scored sections → panel `_type`s from gallery + schema. Adapt to field constraints. Fewer strong panels beats filler.
-
-**GATE 2:** User confirms panel map (`_type` + order + purpose). Do not write Sanity until approved.
-
-### 6 — DRAFT
-
-Fetch Sanity doc. Patch `drafts.<id>`. Article: embed panels in `richText[]`, not top-level `panels`.
-
-→ [3-sanity-document.md](references/3-sanity-document.md)
-
-### 7 — PREVIEW + GATE 3
-
-Open preview URL. Scroll full page. Re-score vs personas. Patch loop until pass threshold or user says ship.
-
-→ [4-preview-and-verify.md](references/4-preview-and-verify.md)
-
-**GATE 3:** User rates preview vs personas or accepts agent re-score. Iterate until satisfied.
-
-### 8 — PUBLISH
-
-Explicit user yes → `manus-mcp-cli tool call publish_documents --server sanity`.
+Publish: explicit yes → `manus-mcp-cli tool call publish_documents --server sanity`.
