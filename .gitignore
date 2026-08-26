@@ -1,4 +1,5 @@
 .env
+**/.env
 **/generate-sanity-panels/scripts/.cache/
 **/generate-sanity-panels/scripts/.artifacts/
 **/generate-sanity-panels/scripts/__pycache__/
