@@ -57,6 +57,16 @@ Path: [`blueprints/add-publisher-panel/`](blueprints/add-publisher-panel/). Star
 
 ## Optional skills (not orchestration deps)
 
+**Optimisations** (`optimisations/`):
+
+| Invoke | When |
+|--------|------|
+| `/optimise-bundles` | Route JS budget / `firstLoadUncompressedJsBytes` CI failure |
+| `/optimise-core-web-vitals` | CLS, LCP, INP, FCP, TTFB, TBT, layout shift, render-blocking, GTmetrix/Lighthouse/CrUX, reimplement vitals |
+| `/core-web-vitals-excellence` | Deploy CWV `.cursorrules` pack to microsites (nextjs or lovable) |
+
+Path: [`rules/core-web-vitals-excellence/`](rules/core-web-vitals-excellence/). Compose: `node rules/core-web-vitals-excellence/scripts/compose-cursorrules.mjs <nextjs|lovable> <repo-path>`.
+
 **Documentation** (`documentation/`): `/document-current-state`, `/document-database`, `/document-flow`, `/generate-changelog`, `/refine-rules`, `/generate-handoff-doc` — invoke separately when needed.
 
 **Other**: `/generate-changelog` for deploy notes.
