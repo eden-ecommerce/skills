@@ -1,0 +1,25 @@
+---
+description: Web accessibility
+globs:
+  - **/*.tsx
+alwaysApply: false
+---
+
+- semantic HTML first
+- label every input (`Label` + `htmlFor`)
+- keyboard reachable controls
+- `aria-label` on icon-only buttons
+- `focus-visible` over `focus`; never `outline-none` without replacement ring
+- interactive controls: 40px min hit area; adjacent targets must not overlap
+- never colour alone for state — pair with icon or text
+- fields: `id`, `aria-invalid`, `aria-describedby` for errors; focus first error on submit
+- polled regions: `aria-live="polite"` and `aria-busy`
+- one `<h1>` per page; hierarchical headings; skip link to main
+- native `<dialog>` via `showModal()` with `aria-labelledby` and focus return
+- honour `prefers-reduced-motion`
+- `Intl.DateTimeFormat` / `Intl.NumberFormat` over hardcoded formats
+- images need `width`, `height`, and `alt`
+- `translate="no"` on brand names and identifiers
+- colour contrast per WCAG AA
+- prefer native elements over div buttons
+- `scroll-margin-top` on anchor targets

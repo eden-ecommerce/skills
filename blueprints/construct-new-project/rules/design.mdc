@@ -1,0 +1,45 @@
+---
+description: Design package law (@eden-ecommerce/design — GitHub Packages)
+alwaysApply: false
+---
+
+# `@eden-ecommerce/design`
+
+Props only — no fetch, env, Sanity, Algolia, `next/image`. Source lives in `eden-ecommerce/design`. Studio consumes the published GitHub Packages tarball.
+
+Studio pins **exact semver** (not `workspace:*`). Unpublished HMR: **yalc**. Gate: `pnpm check:design-release`. See `docs/ARCHITECTURE.md` § Shared-package strategy.
+
+This repo must **not** depend on `@eden-ecommerce/common`.
+
+## Folder layout
+
+Each component is `{Name}/{Name}.tsx` + `{Name}.stories.tsx`. Deep import:
+
+```ts
+import { Button } from '@eden-ecommerce/design/primitives/actions/Button/Button';
+import { EdenHeader } from '@eden-ecommerce/design/eden/header/EdenHeader/EdenHeader';
+```
+
+## Layers
+
+`utilities` / `themes` / `styles` — foundational.
+`primitives` — utilities/themes/styles only; **no cross-primitive family imports** (same-folder `_radix` / `_shadcn` colocation OK).
+`fields` / `layout` / `renderers` — primitives + utilities/themes.
+`blocks` — primitives, fields, layout, utilities, themes, **and other blocks**.
+`eden` / `merchandise` / `panels` — primitives, fields, layout, blocks, renderers, utilities, themes.
+
+`'use client'` files live under `{role}/client/` and take a `Client` suffix.
+
+## Stories / loading / error
+
+Stories always colocate in the component folder. Storybook host is in the `eden-ecommerce/design` repo.
+
+Every `'use client'` component **must** have `{Name}.loading.tsx` + `{Name}.error.tsx` (stories may include Loading/Error). RSC must **not**. Studio wrappers follow the same law for design surfaces.
+
+## Loaders — not in design
+
+`imageLoader` / `videoLoader` / `mapLoader` / `markdownLoader` / `mermaidLoader` live in `@eden-ecommerce/lib`. Design takes slots (`imageSlot`, `media`).
+
+## Deep imports — no barrels
+
+No package-root import. See `no-barrels.mdc`. Gate in the design repo: `pnpm --filter @eden-ecommerce/design check:conventions`.

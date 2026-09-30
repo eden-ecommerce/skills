@@ -1,0 +1,93 @@
+---
+description: Shadcn design token contract for studio UI
+globs:
+  - **/*.{tsx,css}
+alwaysApply: false
+---
+
+# Theme
+
+Tokens live in this app's CSS (`app/globals.css`). Design `styles/theme.css` is Storybook-only. No `tailwind.config.js` — Tailwind v4 is CSS-first.
+
+## Colour (shadcn set)
+
+Design CSS variables are the [shadcn theming set](https://ui.shadcn.com/docs/theming) only. Prefer token utilities over raw hex / `zinc-*`.
+
+| Role | Hex | Token |
+|---|---|---|
+| Fill brand | `#303030` | `--primary` |
+| Fill hover | use `hover:bg-primary/90` | (no `--primary-hover`) |
+| Text on fill | `#ffffff` | `--primary-foreground` |
+| Surface | `#ffffff` | `--card` / `--background` |
+| App bg | `#f1f1f1` | `--muted` |
+| Border | `#e3e3e3` | `--border` |
+| Text | `#202223` | `--foreground` |
+| Secondary text | `#6d7175` | `--muted-foreground` |
+| Link / focus | `#005bd3` | `--ring` |
+| Text on ring fill | `#ffffff` | `--ring-foreground` |
+| Critical | `#d72c0d` | `--destructive` + `--destructive-foreground` |
+| Success | `#29845a` | `--success` + `--success-foreground` |
+| Warning | `#b98900` | `--warning` + `--warning-foreground` |
+
+Muted status surfaces: `bg-destructive/10`, `bg-success/10`, `bg-warning/10` — no separate `-muted` tokens.
+
+Elevation: Tailwind `shadow-sm` / `shadow-lg` — no `--shadow-depth-*` / `shadow-elevated`.
+
+Primary button inset: `linear-gradient(180deg, rgba(48,48,48,0) 63.53%, rgba(255,255,255,0.15) 100%)`.
+
+## Spacing
+
+`--spacing: 0.25rem` (4px base). Layout roles:
+
+| Role | Value |
+|---|---|
+| Page gutter | 24 (`p-6`) |
+| Section gap | 24 (`gap-6`) |
+| Card padding | 16 (`p-4`) |
+| Card inner gap | 12 (`gap-3`) |
+| Inline gap | 8 (`gap-2`) |
+| Tight gap | 4 (`gap-1`) |
+
+`<main>` owns no padding. `PageLayout` is the only gutter.
+
+## Radius / padding triples (concentric)
+
+Outer radius = inner radius + padding.
+
+| Outer | Padding | Inner |
+|---|---|---|
+| `rounded-2xl` (18) | `p-2` (8) | `rounded-lg` (10) |
+| `rounded-3xl` (22) | `p-3` (12) | `rounded-lg` (10) |
+| `rounded-xl` (14) | `p-1` (4) | `rounded-lg` (10) |
+
+Floating pills (badges) are not concentric insets — leave alone.
+
+## Hit area
+
+Interactive controls: `min-h-10` (40px). Adjacent hit areas must not overlap.
+
+## Motion
+
+- Press scale: `active:scale-[0.96]`; `static` prop opts out
+- Timing: `cubic-bezier(0.2, 0, 0, 1)`
+- Never `transition: all` — list properties
+- Honour `prefers-reduced-motion`
+- Enter: split into parts, stagger ~100ms; `opacity` + `translateY(12px)` + `blur(4px)`
+- Exit: subtler and shorter than enter; fixed `translateY(-12px)` — never mirror enter distance
+- Icon cross-fade: both icons in DOM, one absolutely positioned; `scale` 0.25→1, `opacity` 0→1, `blur` 4px→0
+- Skip enter animation on first paint — animate state change, not page load
+- Animations stay interruptible; never queue behind a finishing transition
+- Elevation: Tailwind `shadow-sm` / `shadow-lg`; hairline borders only on inputs
+
+## Media and touch
+
+- `tabular-nums` on any number that updates in place (timers, counts, currency)
+- Optical alignment: icon-side padding = text-side − 2px
+- Image outline `outline-black/10`, or `outline-white/10` on dark — never tinted
+- `touch-action: manipulation` on interactive controls
+- `overscroll-behavior: contain` inside overlays and dialogs. In-page workspace columns chain scroll to the page.
+- Native `<select>` sets explicit `bg` and `text` for dark mode
+
+## Typography
+
+Outfit for sans. Geist Mono for code. `antialiased` on `<html>`. `text-balance` on headings, `text-pretty` on body.

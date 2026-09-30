@@ -1,0 +1,18 @@
+---
+description: Performance defaults
+globs:
+  - **
+alwaysApply: false
+---
+
+- RSC-first in studio
+- `'use client'` only when needed
+- design: tree-shakeable deep exports
+- heavy renderers: `dynamic()` in studio
+- `next/image` in image renderers
+- no autoplay video junk
+- `will-change` only on `transform` / `opacity` / `filter`, only while animating
+- virtualise lists beyond ~50 rows
+- no layout reads (`getBoundingClientRect`, `offsetWidth`) during render
+- `loading="lazy"` below the fold, `priority` above it
+- prefer uncontrolled inputs for high-frequency typing

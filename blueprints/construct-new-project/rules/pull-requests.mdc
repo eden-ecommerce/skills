@@ -1,0 +1,37 @@
+---
+description: Keep the PR/MR body filled from the template — host-agnostic law
+alwaysApply: true
+---
+
+# Pull requests
+
+Template SSOT: `.github/pull_request_template.md` (or the chosen host's equivalent). Every section stays — fill for this branch; never leave `[placeholders]`.
+
+## When
+
+After the user asks to **push** (or create/update a PR/MR), in the same turn: ensure the branch is on the remote, open or refresh the PR/MR body from the template using the git host's own CLI/UI (concrete mechanics: `docs/environment/github.md`, or that host's equivalent once written), and return the PR/MR URL.
+
+Do **not** invent a short Summary-only body. Do **not** skip Dev test / Deployment / Reversion when the template has those headings.
+
+## How to fill
+
+Read the template file, then rewrite each section from the real diff:
+
+| Section | Source |
+|---|---|
+| **Summary** | Why + what (1–2 sentences) |
+| **Scope** | Layers, routes, migrations, package pins, compat, infra-config touch |
+| **Dev test plan** | Concrete local migrate/seed, URLs, SQL, user path; staging e2e URL when deployable |
+| **Reviewer checklist** | Leave boxes; tick only what this PR already satisfies in the diff |
+| **Infra / deploy config** | N/A or the matching boxes + plan-artifact note — see `docs/DEPLOYMENT_STRATEGY.md` |
+| **Deployment plan** | Analyse → Test → Deploy staging → Migrate (if any) → e2e → merge → prod |
+| **Reversion plan** | Code rollback choice; additive vs recovery SQL / restore point |
+
+Prefer checkboxes the template already uses. Mark N/A explicitly when a section does not apply.
+
+## Out of scope
+
+- Do not open a PR unless the user asked to push, create a PR, or update the PR overview.
+- Do not push without an explicit push/PR request.
+- Commit message style stays separate; PR body is the template, not the commit subject alone.
+- Merge to the integration branch only when the predeploy gate is green. Never merge while it is red. See `predeploy.mdc`.

@@ -1,0 +1,34 @@
+---
+description: Layer law — features compose domains; domains call services; no domain-to-domain; processors in services
+alwaysApply: true
+---
+
+# Layers
+
+Features + data compose. Domain never import sibling domain. Processors live in `services/`. Batch job is a run. No `workflows/` folder.
+
+```
+feature / app     → data actions, domain, services
+data actions      → dpo, dto, dal, domain, services
+dpo               → gates, dal, dto
+dto               → (pure)
+dal               → services/db, drizzle
+domain/<entity>   → services, utilities   (NOT data, NOT drizzle, NOT sibling domain)
+services          → utilities, data/*/dal, packages/plugins
+services/db       → drizzle (pool / migrate / probe only)
+```
+
+| Layer | Owns |
+|-------|------|
+| `features/` | Operator jobs, UI |
+| `data/<Entity>/{dto,dpo,dal}` + `data/gates/` | Auth, transform, SQL |
+| `domain/<entity>/` | That entity rules + `process.ts` |
+| `services/ai-processor/` | All AI SDK execution |
+| `services/plugins/` | Thin `executeOperation` |
+| `services/batch-processor/` | Queue, claim, drain |
+| `services/db/` | Connection pool only |
+| `packages/plugins/{vendor}/` | Vendor handlers |
+
+Build step = enqueue `batch_jobs` → worker → `domain/build/pipeline/run/run-step.ts`, which runs `steps/{step}/tasks/{task}`.
+
+See `docs/private/ARCHITECTURE.md`.

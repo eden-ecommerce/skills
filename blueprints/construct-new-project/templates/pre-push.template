@@ -1,0 +1,6 @@
+#!/bin/sh
+# pre-push: same gate CI and the host run. Skipped in CI/host builds.
+if [ -n "$CI" ] || [ -n "$GITHUB_ACTIONS" ] || [ -n "$VERCEL" ]; then
+  exit 0
+fi
+{{PKG_MANAGER}} check

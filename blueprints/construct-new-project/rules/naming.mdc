@@ -1,0 +1,25 @@
+---
+description: Naming conventions
+alwaysApply: true
+---
+
+Under 7 words per identifier. Full English words only.
+
+No abbreviations. No clipped coinages (`needsReack` → `needsReapproval`). Spell the word (`reapproval`, `configuration`, `identifier`) — do not invent a shorter stem.
+
+| Kind | Pattern |
+|------|---------|
+| Feature folder | `{entity}-{objective}` (`brand-browse`, `tenant-create`, `plugin-browse`) |
+| Browse page | `{Entity}BrowsePage` |
+| Detail page | `{Entity}DetailPage` |
+| Phase page | `{Entity}{Phase}Page` |
+| Server read | `get{Entity}Server` / `get{Entities}Server` |
+| Client read | `get{Entity}Client` |
+| Mutations | `create{Entity}`, `update{Entity}` |
+| Model | `{entity}-schema.ts` |
+| Form controller | `use{Entity}FormController` |
+| List controller | `{Entity}ListController` |
+
+Canonical product nouns: **tenant** (not organisation), **plugin** (not integration). Operations stay operations.
+
+Forbidden: `CampaignListPage`, `GetCampaigns`, verb-leading feature folders (`create-brand`, `get-builds`). Use noun-first (`brand-create`).

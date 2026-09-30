@@ -1,0 +1,18 @@
+---
+description: Always-on coding standards
+alwaysApply: true
+---
+
+Use `/caveman ultra` in chat. Build uses `/ponytail`.
+
+- never `any` or `unknown` — infer from schema, API, package types
+- no `as` on user or API input — parse with the schema that owns the shape (`safeParse` / `zodFormikValidate`)
+- hooks: skip `useCallback` unless proven need; avoid `setTimeout`; limit `useEffect` chains; `useMemo` only for expensive stable data
+- SOLID + one concern per module
+- dynamic unions: exhaustive switch + `assertNever` from `@/utilities/assertNever` (design: `utilities/assertNever`)
+- KISS minimal diff
+- DRY reuse design + existing presenters
+- styling: tailwindcss, tailwind-merge, tailwind-variants
+- icons: lucide-react
+- follow active sub-plan under `docs/feature/*/sub-plans/`
+- run scripts via pnpm per `.cursor/STRUCTURE.md`

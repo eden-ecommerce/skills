@@ -1,0 +1,20 @@
+---
+description: SDLC and doc prose law
+alwaysApply: true
+---
+
+Follow `docs/feature/<feature>/sub-plans/{step}-*-sub-plan.md`.
+
+Master plan in `docs/feature/<feature>/*-master-plan.md`.
+
+**md/mdc prose:** write `/caveman ultra`. Technical terms and code verbatim.
+
+**Sub 10 gate:** `/ponytail-review` every in-scope md/mdc. Artefact `test-plans/10-docs-ponytail-review.md`.
+
+Post-Build: `/ponytail-review` on TS diffs. Milestone: `/ponytail-audit`.
+
+Sync plan: `/sync-plan` updates `docs/CHANGELOG.md` `[Unreleased]`.
+
+**Push / PR:** after push, fill or refresh the GitHub PR body from `.github/pull_request_template.md` — see `.cursor/rules/pull-requests.mdc`.
+
+**Merge to main:** `pnpm predeploy` green — `.cursor/rules/predeploy.mdc`.

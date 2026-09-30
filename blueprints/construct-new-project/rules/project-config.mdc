@@ -1,0 +1,17 @@
+---
+description: Stack-specific config — read docs/config after checking package.json deps
+alwaysApply: true
+---
+
+# Project config
+
+Before stack-specific work, read root `package.json` `dependencies`:
+
+| Dependency | Doc |
+|---|---|
+| `@tanstack/react-start` | `docs/config/tanstack-start.md` |
+| `next` (no `@tanstack/react-start`) | `docs/config/nextjs.md` |
+
+Copy only the doc matching the stack chosen at intake. Do not apply one stack's rules (`app/`, `next/image`, `predeploy`) to the other.
+
+Per-project answers (stack, ports, origins, builder yes/no) live in `docs/CONFIG.md` § Stack.

@@ -1,0 +1,48 @@
+---
+description: Group multi-section edit and detail pages with URL-synced tabs.
+alwaysApply: true
+---
+
+# Page tabs — section grouping
+
+When a page has **two or more logical sections** (edit forms, detail views, settings), group them with tabs — not a long vertical stack of `SectionLayout` blocks.
+
+## Required behaviour
+
+1. **Use `PageTabsView`** from `features/studio-shell/views/PageTabsView` in studio pages. It wraps design `TabsView` and syncs the active tab to **`?tab=<slug>`**.
+2. **Match edit ↔ detail** — edit form tabs should mirror the detail page tab keys and labels where both exist (e.g. brand edit ↔ brand detail, template edit ↔ template detail).
+3. **One panel per tab** — wrap tab content in a single `rounded-2xl border … bg-card p-4 shadow-elevated` card per panel.
+4. **Submit outside tabs** — keep the primary save/submit button below the tab strip so it applies to the whole form.
+5. **URL sync** — read tab from `useSearchParams` on load; write on tab change with `router.replace(..., { scroll: false })`. Omit `tab` when the default/first tab is active.
+6. **Valid slugs only** — validate `tab` against the tab `key` allow-list; fall back to the default for unknown values.
+
+## When tabs are not required
+
+- Single-section create/edit forms with ≤4 closely related fields (e.g. tenant rename, plan name + brief).
+- Browse/list pages — `SectionLayout` for Active/Archived groups is fine.
+- In-flow build **steps** — use `StepperView` as a horizontal tab strip driven by route segments (`/build/[id]/[phase]/[step]`), not `?tab=`. Prefer `BuildStepStepper` listing all build steps.
+- Build target / pack switching (`BuildTargetTabsView`) — workflow sub-navigation synced to **`?pack=`** (omit when default/first pack). Not page section grouping.
+
+## Do not
+
+- Stack multiple `SectionLayout` blocks on edit/detail/settings pages when sections map to distinct operator tasks.
+- Use `TabsView` directly in studio pages that should be shareable — use `PageTabsView` for URL sync.
+- Put unrelated workflows on one tab.
+- Use `PageTabsView` / `?tab=` for in-flow build step progression — that belongs on `StepperView` + routes.
+
+## Reference implementations
+
+- `features/brands/views/components/BrandFormView.tsx` + `BrandDetailTabsView.tsx` — aligned tab keys
+- `features/templates/views/components/TemplateFormView.tsx` + `TemplateDetailTabsView.tsx`
+- `features/account/views/pages/AccountPage.tsx` — settings grouped by concern
+- `features/studio-shell/views/PageTabsView.tsx` — URL sync helper
+- `features/builds/views/components/BuildStepStepper.tsx` — in-flow step strip
+- `features/builds/views/components/BuildTargetTabsView.tsx` — `?pack=` sync
+
+## Checklist before merge
+
+- [ ] Edit/detail pages with 2+ sections use `PageTabsView`, not vertical `SectionLayout` stacks.
+- [ ] Tab keys match between edit and detail where both exist.
+- [ ] `?tab=` opens the correct panel; default tab omits the param.
+- [ ] Browser back/forward restores the previous tab.
+- [ ] Build step progression uses `StepperView` / route segments, not `?tab=`.

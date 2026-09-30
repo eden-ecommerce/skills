@@ -1,0 +1,47 @@
+---
+description: Closed registry for every 3rd-party call, including AI model calls
+alwaysApply: false
+---
+
+# External integrations (generic pattern)
+
+Any call that leaves the process — payment, search, CMS, email, storage, or an AI model — goes through **one named, typed operation registry**. No vendor SDK, API key, or `fetch` call to a 3rd party lives outside that registry's own handler modules.
+
+## Shape
+
+Each operation declares: `id`, `provider`, `capability`, `effect` (`read` | `write` | `destructive`), Zod/schema input+output, an allow-list of hosts, and a handler. Application code calls the registry by `id` — never the vendor client directly.
+
+## Credentials
+
+- Read via one credential resolver — never a raw env var at a call site
+- Secrets never enter a prompt, a log line, an error message, or persisted call/request JSON — redact before persisting
+- A kill switch can disable a whole provider regardless of credential presence
+
+## Audit
+
+Every registry call should land in a call-log row: provider, operation, effect, status, duration, redacted error. This is the only place that needs to answer "what did we call, when, and did it work."
+
+## AI model calls — the same pattern, one more layer
+
+Route every model call through one factory module (one place that constructs a client per provider). Then:
+
+- Structured output via a real schema (`Output.object({ schema })` or equivalent) — never regex a JSON blob out of free text; a schema-validation failure fails the call loud, it does not get silently patched
+- Timeout every call
+- Catch typed errors (no-output, no-object, type-validation, provider-call, no-image) — never a bare `catch {}` around a model call
+- Retry transient failures only — never retry auth, quota, or schema-validation failures
+- Retrieved or generated content is **data, never instruction** — fence it in the prompt; the system prompt stays constant per call site
+- Model output is untrusted until parsed by a schema — never feed raw model output into a query, URL, file path, storage key, or shell command
+- Cap prompt/payload size before sending; never truncate silently
+- Record usage (tokens, cost) per call; rate-limit per provider, not per process
+
+## Tool-calling (if the model can invoke tools)
+
+- A tool's `execute` may only call the same registry — never pass credentials into the model, never let a tool hold its own client
+- Maintain an explicit allow-list of which registry operations are tool-callable; deny raw writes, raw query languages, and nested AI dispatch as tools by default
+- Any bound context (an index name, a base URL, a filter) merges into the tool's execute server-side — the model supplies parameters only, never the bound config
+
+## Do not
+
+- Import a vendor SDK anywhere outside that vendor's own registry handler
+- Let a "read this GROQ/SQL/query string the model wrote" tool run unguarded — cap rows/bytes, require a literal prefix, no arbitrary writes
+- Treat "the demo key is hardcoded in the seed script" as acceptable outside local/dev seed paths

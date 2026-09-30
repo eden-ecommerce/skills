@@ -1,0 +1,46 @@
+---
+description: Interaction and content handling
+globs:
+  - **/*.tsx
+alwaysApply: false
+---
+
+# Interaction
+
+## Destructive and irreversible
+
+- confirmation or undo — never immediate
+- confirm via native `<dialog>` + `showModal()` per **accessibility**
+- confirm copy names the consequence and the affected thing
+- destructive confirm button carries the action's own label, not `Yes`
+
+## Async actions
+
+- pending state on submit-style buttons: disabled + spinner until the request settles
+- never allow a double submit
+- optimistic only when failure is recoverable and reversible in place
+- long-running work shows elapsed time, not a bare status word
+
+## Blocked states
+
+- a disabled control renders one reason string beside it
+- never collapse several causes into one dead control — compute the specific reason
+
+## Multi-step flows
+
+- advancing a step (Continue / Next) that unlocks the next step's async work starts that work immediately — never require a second manual "Generate" / "Start" click when the step is already unlocked
+- show the next step as in-flight ("Starting…"), not an idle empty state waiting for a redundant click
+
+## Navigation
+
+- `Link` for navigation, never `onClick` + `router.push` — middle-click and Cmd-click must work
+- no `href` on non-navigating elements; use `<button>`
+- URL reflects state per **page-tabs**
+- active item in a scrollable nav scrolls into view on mount
+
+## Content handling
+
+- assume any string can be long: `truncate`, `line-clamp-*`, or `break-words`
+- `min-w-0` on flex children that contain text
+- `break-words` on unbounded machine strings (errors, ids, URLs) — never inside a badge
+- never render user or provider content into a fixed-height box without a clamp

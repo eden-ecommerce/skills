@@ -1,0 +1,18 @@
+# {{PROJECT_NAME}} — agent entry
+
+{{ONE_LINE_MISSION}} Single {{FRAMEWORK}} app at repo root.
+
+This file is a pointer only. Every rule and doc lives in `.cursor/rules/` and `docs/`; the same text is written to `CLAUDE.md` (Claude Code), `AGENTS.md` (Codex + generic agents) and `PROJECT_RULES.md` (v0). Never add rules here — add them under `.cursor/rules/`. `{{PKG_MANAGER}} check` fails if the three copies differ.
+
+## Before any change
+
+1. Read every always-on rule in `.cursor/rules/` (Cursor loads these itself; every other tool must read them):
+{{ALWAYS_ON_RULES_LIST}}
+2. Before touching matching paths, read the on-demand rule for them — table in `.cursor/rules/project-overview.mdc`.
+3. Stack and deploy target: `docs/CONFIG.md`, then the docs named in `.cursor/rules/project-config.mdc` and `.cursor/rules/project-environment.mdc`.
+4. Scripts, routes, docs index: `.cursor/STRUCTURE.md`.
+
+## Before handing work back
+
+- `{{PKG_MANAGER}} check` green (`.cursor/rules/dev-checks.mdc`). A working preview is not done.
+- Commits/PRs: {{ATTRIBUTION_POLICY}}.

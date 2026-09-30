@@ -1,0 +1,70 @@
+---
+description: Remove deprecated code; keep project clean; no ID aliases
+alwaysApply: true
+---
+
+# No deprecated — keep clean
+
+Delete dead / deprecated / superseded paths in the same change that replaces them. Do not leave shims, dual APIs, or “remove later” leftovers.
+
+Greenfield OK: reseed / migrate fresh DB. Prefer current SSOT only — never soft-migrate old ids in runtime.
+
+## Remove
+
+- `@deprecated` symbols, unused exports, orphan files
+- Legacy routes once redirects proven (or delete redirect when callers gone)
+- Commented-out code, unused deps, unused env keys / docs for removed features
+- Compatibility wrappers after one call-site cutover
+- Duplicate presenters / controllers when one path wins
+- **ID / name alias maps** (`Record<OldId, NewId>`, `canonicalX(id)` that rewrites, “also accept foo”)
+
+## Forbidden
+
+- New `@deprecated` without same-PR deletion plan
+- Keeping old + new “just in case”
+- `// TODO: remove` without ticket + near-term delete
+- Barrel re-exports of removed modules
+- **Alias tables** like:
+
+```ts
+// FORBIDDEN
+export const EMAIL_PANEL_ID_ALIASES = {
+  'eden-header': 'header',
+  'hero-with-image': 'hero',
+};
+export function canonicalEmailPanelId(id: string) {
+  return EMAIL_PANEL_ID_ALIASES[id] ?? id;
+}
+```
+
+- Accepting legacy LLM / DB / URL strings and silently rewriting to current ids
+- Dual schema keys for the same panel (`header` + `eden-header`)
+- Model-id remaps (`gemini-2.5-flash` → `gemini-3.5-flash`) — seed/config must store current ids
+- Brand/config “flat legacy” parsers once nested SSOT exists
+
+## One source of truth
+
+- Panel / slice / step / model ids appear **once** — the allowlist / const / seed row
+- Unknown id → **fail loud** (throw / Zod reject), never remap
+- DOM ids (`#eden-header` on storefront chrome) are not pipeline panel types — do not confuse the two
+- Multi-provider token paths (Sunseeker vs Mailchimp) are **separate first-class lists**, not aliases of each other — name them by provider, not `*Alias*`
+
+## When touching code
+
+1. Grep callers of old symbol / route / env / id string
+2. Cut every caller to the current id
+3. Delete alias map / shim / dual key
+4. Drop docs / STRUCTURE / CONFIG / prompt lines that teach the old id
+5. Reseed if DB rows still carry old ids
+
+Prefer delete over comment. Prefer one API over soft migration layers.
+
+## Greenfield — no backward compatibility
+
+This app reseeds a new database. Runtime must not keep old shapes alive.
+
+- No runtime acceptance of old URL or query params (`?unit=` once it became `?task=`). Unknown params are ignored; old names are not forwarded.
+- No soft-migration of old DB rows in read paths. If a column or table is gone, the reader talks to the current table only. Seed writes current ids.
+- No “legacy” modules in an active registry. If a checker, operation, or prompt still runs, it has a current name. Delete the old file in the same change.
+- No fallback that treats a flat payload as a `{result, meta}` envelope, or a single persona object as a personas array.
+- Fail loud on unknown step, task, operation, or checker ids.

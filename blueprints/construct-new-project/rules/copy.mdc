@@ -1,0 +1,45 @@
+---
+description: User-facing copy
+globs:
+  - **/*.tsx
+alwaysApply: false
+---
+
+# Copy
+
+Users are not engineers. UI text is product, not debug output.
+
+## Never leak the implementation
+
+- no raw enum / slug / status / identifier values — map through a label constant
+- no shell commands, file paths, env var names, or table names
+- no stack traces or provider error strings verbatim — summarise, detail behind a collapsed "Technical details" element
+- pair a raw id with its human name when the id must show (`Order 1000000`)
+- full-page errors: **error-pages** rule (sentence-case H1, no HTTP codes, no red)
+
+Bad: `Job status: pending_worker` · `Restart the queue`
+Good: `Ready for review` · `Nothing has run yet`
+
+## States name the fix
+
+- errors say what to do next, not only what broke — one human line + collapsed details
+- empty states say what will fill them and offer the action
+- disabled controls say why, next to the control
+- every list has designed empty, loading, and error copy
+
+## Voice
+
+- second person, active voice, present tense
+- Title Case for headings, buttons, labels; sentence case for body and helper text
+- numerals for counts (`3 targets`)
+- specific button labels naming the action (`Approve output`, not `Continue` / `Submit` / `OK`)
+- no `Are you sure?` — state the consequence (`Send this step back for regeneration?`)
+
+## Characters
+
+- `…` not `...`
+- curly quotes `’` `“` `”`
+- non-breaking space between value and unit or key (`10 MB`, `⌘ K`)
+- loading text and placeholders end with `…`
+- placeholders show an example, not a restatement of the label
+- `Intl.DateTimeFormat` / `Intl.NumberFormat` — never hand-rolled formats

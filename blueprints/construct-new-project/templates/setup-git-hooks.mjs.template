@@ -1,0 +1,12 @@
+#!/usr/bin/env node
+import { existsSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+if (!existsSync(join(root, '.git'))) process.exit(0);
+
+const result = spawnSync('git', ['config', 'core.hooksPath', '.githooks'], { cwd: root });
+if (result.status !== 0) console.warn('setup-git-hooks: could not set core.hooksPath');
+else console.log('setup-git-hooks: core.hooksPath = .githooks');

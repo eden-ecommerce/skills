@@ -1,0 +1,30 @@
+---
+description: Keep docs/public operator guides in sync when product setup, phases, steps, gates, or integrations change.
+alwaysApply: true
+---
+
+# Public documentation (`docs/public`)
+
+## When to update
+
+Update **`docs/public/`** (and `DOCUMENTATION_MANIFEST` in `data/Documentation/documentation-manifest.ts`) when any of these change in a user-visible way:
+
+- Setup flows (tenants, plugins, brands, targets, templates)
+- Build phases / steps / gates
+- Integrations operators configure or rely on
+- Navigation or shell surfaces that change how operators move through the product
+
+## Wording
+
+- **`docs/public/`** — non-developer wording for operators and editors. No stack jargon, no internal file paths as the main instruction.
+- **`docs/feature/`** — internal SDLC / engineering plans stay here. Do not move master/sub-plans into `docs/public/`.
+
+## Manifest
+
+Every `docs/public/*.md` file must appear in `DOCUMENTATION_MANIFEST`. Every manifest `file` must exist under `docs/public/`. The Vitest file `manifest.test.ts` enforces both.
+
+## Do not
+
+- Publish engineering-only notes as public guides
+- Hardcode long guide copy in React when it belongs in `docs/public/`
+- Skip the manifest when adding a new public markdown file

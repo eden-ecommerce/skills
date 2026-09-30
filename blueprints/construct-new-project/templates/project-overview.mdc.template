@@ -1,0 +1,48 @@
+---
+description: Project objective, workspaces, import law, on-demand rule table
+alwaysApply: true
+---
+
+# {{PROJECT_NAME}}
+
+{{PROJECT_MISSION_PARAGRAPH}}
+<!-- What does "good" output/behavior mean for this product? Who is it for? What does every unit of work (page, feature, job) have to earn its place by doing? -->
+
+## Workspaces & import law
+
+- **Repo root** — product: `app/`, `features/`, `data/`, `domain/`, `services/`{{EXTRA_ROOT_DIRS}}
+- {{SHARED_PACKAGE_LINE}} <!-- e.g. "`@org/design` / `@org/lib` — registry exact semver." or delete if no shared package tier yet -->
+- **`packages/plugins/*`** — thin 3rd-party API clients {{OR_DELETE_IF_NONE}}
+- **`packages/libraries/*`** — framework-free engines {{OR_DELETE_IF_NONE}}
+
+Layer boundaries + `import/no-cycle` (maxDepth 6) in the lint config (`layers.mdc`):
+
+```
+app → feature, data, domain, services, …
+data → domain, …
+domain → services, {{ORM}} (NOT data)
+services → {{ORM}} (NOT domain)
+```
+
+Feature folder (`features/<entity>-<objective>/`, noun-first: `{{EXAMPLE_ENTITY}}-browse` not `create-{{EXAMPLE_ENTITY}}`): `models/ views/pages/ views/components/ views/phases/<phase>/ controllers/ hooks/ api/ utilities/ types/ tests/ config.ts or config/`. Omit empty dirs. Server actions in `data/<Capability>/` stay thin; business rules in `domain/`.
+
+Canonical nouns: {{CANONICAL_NOUNS}}. Glossary: `docs/CONTEXT.md`.
+
+## {{MODULES_HEADING}}
+<!-- Only if the brief has 2+ distinct user journeys. See docs/ARCHITECTURE.md § Module ownership pattern. Delete this section for a single-journey app. -->
+
+- **{{MODULE_1}}** — Owns: {{...}}. Not: {{...}}.
+- **{{MODULE_2}}** — Owns: {{...}}. Not: {{...}}.
+
+## On-demand rules (read before touching matching paths)
+
+| File | Scope |
+|---|---|
+{{ON_DEMAND_RULES_TABLE_ROWS}}
+
+## Gates before merge
+
+- `{{PKG_MANAGER}} check` green on every push (pre-push hook + CI + host checks)
+- `{{PKG_MANAGER}} predeploy` green before merge {{OR_CHECK_AND_BUILD_FOR_TANSTACK}}
+- Sub-plan checkbox synced (if using the master/sub-plan SDLC flow)
+- After push: PR body filled from `.github/pull_request_template.md`

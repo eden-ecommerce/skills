@@ -1,0 +1,26 @@
+---
+description: Testing
+globs:
+  - "**/*.test.ts"
+  - "**/*.test.tsx"
+  - e2e/**
+  - apps/storybook/**
+alwaysApply: false
+---
+
+Unit: Vitest. E2E: Playwright on studio shell.
+
+Colocate unit tests in a `tests/` folder next to the module — same hierarchy as `hooks/` / `views/` / `models/`. Never `foo.test.ts` beside `foo.ts`.
+
+```text
+domain/brands/brand-config-schema.ts
+domain/brands/tests/brand-config-schema.test.ts
+
+features/plan-edit/tests/no-session-storage-handoff.test.ts
+```
+
+Test real behaviour: nav config, seed invariants, DAL column selects.
+
+Storybook build smoke optional in CI.
+
+One smoke test per module is fine. Do not delete for being minimal.

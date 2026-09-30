@@ -1,0 +1,46 @@
+---
+description: Relational schema, DAL, runtime config SSOT, and storage split
+globs:
+  - drizzle/**
+  - services/db/**
+  - data/**/dal/**
+alwaysApply: false
+---
+
+**Types**
+- PK / logical parent ids: `INT UNSIGNED` autoincrement only (not MEDIUMINT, not UUID)
+- **No SQL `FOREIGN KEY` constraints. No `ON DELETE` / `ON UPDATE CASCADE`.** Parent ids are plain INT columns; integrity is app + unique indexes.
+- Slug: kebab-case `varchar` for URLs only — never PK, never join key, never `randomUUID()`
+- timestamps: `datetime(3)` + `created_at` / `updated_at`
+- tenant rows: logical `tenant_id` INT + composite indexes `(tenant_id, …)`
+
+**Timestamps are UTC, always**
+- Every stored date/time is UTC. `datetime(3)` has no timezone metadata, and this DB server's own session `time_zone` is `SYSTEM` (BST, not UTC) — its `CURRENT_TIMESTAMP(3)`/`NOW()` are evaluated in that local zone, not UTC. **Never rely on a column's `DEFAULT CURRENT_TIMESTAMP(3)` / `ON UPDATE CURRENT_TIMESTAMP(3)` for a value the app reads back** — it silently carries the DB server's local-time skew (caught live: `batch_jobs.created_at` was an hour ahead of every other timestamp on the same row). Set every timestamp explicitly from the app with `new Date()` (real UTC epoch) on insert and update instead.
+- Frontend: never store or pass around a formatted/localized date string. Keep the raw `Date` (or ISO string) end to end and format only at the render boundary with `Intl.DateTimeFormat`/`toLocaleString` using the viewer's own locale/timezone (i.e. **do not pass an explicit `timeZone` override** — let it default to the browser's) so a UK operator and a US operator looking at the same row each see their own local time, not a hardcoded zone.
+
+**DAL**
+- select named columns only, no `select *` on hot paths
+- keyset pagination for large lists
+- transactions for multi-table writes
+- explicit archive/delete in app code — never rely on cascade
+
+**Migrations**
+- drizzle-kit generate + human SQL review
+- one concern / entity per baseline SQL file after squash
+- greenfield: drop + recreate OK; no dual-write aliases
+
+Scripts: `pnpm db:generate`, `db:migrate`, `db:seed`.
+
+## Runtime config is the database, not a TypeScript fallback
+
+Any config that changes shape without a redeploy — a feature catalog, a prompt, an allow-list, a step/pipeline definition — lives in the database. At runtime, never substitute a hardcoded TypeScript catalog when the DB row is empty or missing.
+
+- Missing config row → **fail loud with a caller-visible error**, never a silent default
+- Seed catalogs (`scripts/db/seed-data/**` or equivalent) write into the DB only at seed time — application code never imports them directly
+- No copy of config text (prompts, rule guidance, catalog labels) lives in application code once it has a DB row — the code reads the row
+
+## Storage split — bytes vs JSON
+
+Object/blob storage (S3-compatible, GCS, etc.) holds **binary bytes only** — generated images, uploads, exports. Queryable, gated, or form-rendered JSON (config, logs, request/response payloads, usage records) stays in the relational DB, even when large.
+
+If a JSON write is too big for a column or the connection's packet size, raise the DB's payload limit — never invent a sidecar pointer convention (`{ __blobKey: '...' }`) to smuggle structured data into the blob store.

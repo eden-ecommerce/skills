@@ -1,0 +1,33 @@
+---
+description: Form controllers
+globs:
+  - **/controllers/**
+  - **/views/**
+alwaysApply: false
+---
+
+Formik per form surface. One `use{Entity}FormController`.
+
+- load via `get*Client` or RSC props
+- `validationSchema` from Zod model
+- `onSubmit` calls server action
+- wire `touched`, `dirty`, `errors` to design fields (`FieldError`)
+- submit / server failures: `InlineErrorView` — never raw Zod JSON or provider dumps
+- multi-section forms: `PageTabsView` per **page-tabs** rule (not vertical `SectionLayout` stacks)
+
+Views stay presentational.
+
+## Validation
+
+- User input and API payloads never reach typed state via `as`. Parse with the schema that owns the shape (`safeParse` or Formik `zodFormikValidate`).
+- Selects and unions: `z.enum` or literal unions. `z.coerce` only at the form edge.
+- Failed parse → `FieldError` / `InlineErrorView` with `configureZodErrors` copy. Never raw Zod JSON.
+
+## Field behaviour
+
+- never block paste
+- `autocomplete` plus a meaningful `name` on every field
+- correct `type` and `inputmode`
+- `spellCheck={false}` on codes, emails, usernames, identifiers
+- submit stays enabled until the request starts, then pending per **interaction**
+- warn before navigating away from a `dirty` form

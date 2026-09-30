@@ -1,0 +1,33 @@
+---
+description: Durable/background job pattern — queue table, worker, polling UI
+alwaysApply: false
+---
+
+# Background jobs (generic pattern)
+
+Any unit of work that can outlive a single request (an AI generation step, a bulk export, a send) is **enqueued, not awaited inline**.
+
+## Shape
+
+- Enqueue writes one row to a queue table — **id and shape only, never credentials or decrypted secrets** in the queued payload
+- A separate worker (a long-running process, a cron-triggered job, or a platform's background-task primitive) claims and drains rows
+- The queue table is the **system of record** — the UI polls that row's status, it does not trust an in-memory promise across a request/response boundary or a client-held reference that can go stale on redeploy
+- One queue row = one task attempt. Fan-out (the same task run once per item in a list) still writes one row per item — never smash N independent operations into a single retry-atomic unit; a retry must be able to skip the units that already finished
+
+## Client-side lifecycle calls
+
+Approve / retry / stop / regenerate actions call a stable endpoint keyed by an id in the URL — not a server-action reference captured in an already-rendered page. A build-time action reference can go stale the moment the process hot-reloads or redeploys; a URL-routed endpoint resolves fresh every time.
+
+## Orphan handling
+
+A sweep (cron or scheduled function) reclaims or fails rows stuck `running` past a sane timeout. Nothing should be able to wedge a queue row `running` forever with no owner.
+
+## Bundle hygiene
+
+If enqueuing pulls in a large, rarely-hit module graph (the actual job-processing code), import it dynamically **inside** the enqueue call — not at the top of the module that merely triggers the job. A top-level import drags that whole graph into every caller's bundle and, on some platforms, forces a synchronous compile on first hit.
+
+## Do not
+
+- Await the full job inline in a request handler that can exceed the platform's request timeout
+- Store decrypted credentials or secrets in the queued payload or in suspended/durable workflow state
+- Build a second, parallel notion of "job status" in application memory that can drift from the queue table

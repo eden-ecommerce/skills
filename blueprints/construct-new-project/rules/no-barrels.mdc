@@ -1,0 +1,25 @@
+---
+description: Deep imports only — no barrels (tree-shaking)
+alwaysApply: true
+---
+
+# No barrels
+
+Import every public symbol from **its own file**. Never a package root or folder `index`. Each design component is a folder: `{Name}/{Name}.tsx`.
+
+```ts
+// yes
+import { Button } from '@eden-ecommerce/design/primitives/actions/Button/Button';
+import { EdenHeader } from '@eden-ecommerce/design/eden/header/EdenHeader/EdenHeader';
+
+// no
+import { Button, EdenHeader } from '@eden-ecommerce/design';
+import { EdenHeader } from '@eden-ecommerce/design/eden/header';
+```
+
+Law:
+
+- Published `@eden-ecommerce/design` has no `index.ts` / `index.tsx` under src and no `"."` root export.
+- No `export * from` / re-export barrels in this repo either.
+- Consumers: ESLint `no-restricted-imports` blocks bare `@eden-ecommerce/design`.
+- Gate (design repo): `pnpm --filter @eden-ecommerce/design check:conventions`.

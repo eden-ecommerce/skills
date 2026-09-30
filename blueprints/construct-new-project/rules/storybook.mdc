@@ -1,0 +1,18 @@
+---
+description: Storybook lives in the design repo
+alwaysApply: false
+---
+
+Storybook documents `@eden-ecommerce/design` only. Host + stories live in **eden-ecommerce/design** at `apps/storybook`.
+
+Run stories from that repo (`pnpm dev`). Do not add a `stories/` tree here.
+
+## Colocated stories (design package)
+
+- `{Name}.stories.tsx` lives **in** `{Name}/` beside `{Name}.tsx`.
+- Every `'use client'` component has `{Name}.loading.tsx` / `{Name}.error.tsx`. Stories may include Loading/Error.
+- RSC must not have loading/error files.
+
+## No loaders in Storybook
+
+Never import `@eden-ecommerce/lib`. Mock `imageSlot` / `media` with static placeholder markup.

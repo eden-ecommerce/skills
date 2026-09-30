@@ -1,0 +1,22 @@
+---
+description: React Query and server data
+globs:
+  - features/**/api/**
+  - data/**
+alwaysApply: false
+---
+
+Client reads: `features/*/api/get*Client.ts` with TanStack Query.
+
+Pattern per hook file: `get*QueryKey`, `get*QueryOptions`, `use*Client`.
+
+Server reads: `data/<Capability>/get*Server.ts`. Any `data/` module imported from `features/*/api/get*Client.ts` **must** start with `'use server'` on line 1. Missing that pulls Node-only graphs (`sharp`, `child_process`, Drizzle) into the browser bundle.
+
+Mutations: `create*`, `update*` in `data/`. Call `dal/`. No fetch in views.
+
+Cache invalidation:
+
+- Every `get*Client.ts` exports `get*QueryKey` + `get*QueryOptions`.
+- Every mutation that changes list membership (archive, restore, create, update) must invalidate the matching list key in the same turn.
+- Shared archive/restore controls use `features/studio-shell/config/query-invalidation.ts` — do not rely on `router.refresh()` alone for client-backed browse pages.
+- Prefer `queryClient.invalidateQueries({ queryKey })` over `refetch()` so all subscribers update.

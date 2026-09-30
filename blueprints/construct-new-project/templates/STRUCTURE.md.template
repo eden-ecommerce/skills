@@ -1,0 +1,30 @@
+# STRUCTURE
+
+Agent bind. Gates + scripts. Prose in `docs/`.
+
+## Docs index
+
+{{DOCS_INDEX_ROWS}}
+<!-- Include docs/config/<stack>.md and each docs/environment/<target>.md the project copied. -->
+
+## Scripts (root)
+
+| Script | Action |
+|---|---|
+{{SCRIPTS_TABLE_ROWS}}
+
+## Routes
+
+{{ROUTES_LIST}}
+
+## Paths
+
+- product: this repo ({{FRAMEWORK}} at root)
+{{EXTRA_PATH_ROWS}}
+
+## Gates before merge
+
+- `{{PKG_MANAGER}} check` green on push (hook + CI + host)
+- `{{PKG_MANAGER}} predeploy` green {{OR_CHECK_AND_BUILD_FOR_TANSTACK}}
+- sub-plan checkbox synced (if using master/sub-plan SDLC)
+- prose stays terse per the doc-writing convention this project picked at intake

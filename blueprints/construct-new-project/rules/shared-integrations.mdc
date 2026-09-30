@@ -1,0 +1,25 @@
+---
+description: Shared integrations live in @eden-ecommerce/lib — never shadow published subpaths in the app.
+globs: lib/**,hooks/**,**/lib/**
+alwaysApply: false
+---
+
+# Shared integration ownership
+
+Reusable integration logic lives in `@eden-ecommerce/lib`, not under this monorepo’s app `lib/` or `hooks/` when that path already exists as a published subpath.
+
+## Put in `@eden-ecommerce/lib`
+
+APIs, GROQ getters, env guards, shared client hooks, formatters, loaders (`loaders/*`). Import `@eden-ecommerce/lib/<subpath>`.
+
+## Keep in this monorepo
+
+Studio features, domain, services, in-repo `packages/plugins/*` / `packages/libraries/*`, and UI that wires **local** controls or design slots.
+
+## Adding a shared integration
+
+1. Implement in lib → publish `lib-vX.Y.Z` → consumer exact pin bump in `package.json`.
+2. App owns composition only — do not copy hooks/types into the app to bypass lib.
+3. Design stays props-only; loaders and third-party SDKs stay in lib (slots into design).
+
+Never shadow a published `@eden-ecommerce/lib/...` export with a same-path local file.

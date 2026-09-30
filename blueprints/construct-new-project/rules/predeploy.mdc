@@ -1,0 +1,18 @@
+---
+description: pnpm predeploy must pass before merge to main
+alwaysApply: true
+---
+
+# Predeploy before main
+
+Never merge to `main` while `pnpm predeploy` is red. Same bar for any PR that should land on `main`.
+
+`pnpm predeploy` is the `pipeline` alias. Runs, in order: `pipeline:branch-base` → `typecheck` → `lint` → `test` → `build` → `test:e2e`.
+
+After the change set, run `pnpm predeploy`. Fix until it exits 0. Do not merge. Do not call the branch merge-ready while it is red.
+
+Branch must include latest `origin/main` (`pipeline:branch-base`). Rebase if it does not.
+
+TanStack Start / builder-first repos ship on `check` + `build` instead (`dev-checks.mdc`, `docs/config/tanstack-start.md`) — no `predeploy` there.
+
+CI Analyse + Test unit is not a substitute — local `predeploy` still includes `build`, e2e, and branch-base.

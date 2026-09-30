@@ -1,0 +1,15 @@
+---
+description: Deploy target + local dev environment — read the docs listed here before deploy, CI, or infra work
+alwaysApply: true
+---
+
+# Project environment
+
+Chosen at intake (`docs/DEPLOYMENT_STRATEGY.md` § 1, `docs/CONFIG.md` § Stack). Read the docs below before touching deploy config, CI, env, or infra. Environments not listed here were not chosen — ignore any guidance for them.
+
+| Environment | Doc | Applies to |
+|---|---|---|
+{{ENVIRONMENT_DOC_ROWS}}
+<!-- Rows come only from docs/environment/: vercel.md, terraform.md, docker.md, github.md, developer.md (or a new <target>.md written in the same shape). Delete this comment. -->
+
+Generic gates that apply to every environment: `dev-checks.mdc`, `predeploy.mdc`, `pull-requests.mdc`.

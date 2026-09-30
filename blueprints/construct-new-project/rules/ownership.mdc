@@ -1,0 +1,11 @@
+# Design package vs studio app
+
+## `@eden-ecommerce/design`
+
+Props-only shared UI. Exact Changeset semver in `package.json` from GitHub Packages. Never `workspace:*`. Unpublished HMR: **yalc**. Theme tokens belong in the consumer app CSS — do not import design `theme.css` for production apps (Storybook may, in the design repo).
+
+## This repo (`content-studio`)
+
+Studio features, domain, data, plugins, libraries. **Must not** depend on `@eden-ecommerce/common`.
+
+App deps: published semver for design and lib in `package.json`. Gate: `pnpm check:design-release`. `transpilePackages: ['@eden-ecommerce/design', '@eden-ecommerce/lib']`.

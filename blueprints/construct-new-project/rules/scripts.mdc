@@ -1,0 +1,32 @@
+---
+description: Canonical script verbs (generic — not tied to any deploy target)
+alwaysApply: true
+---
+
+# Scripts
+
+One verb. `:target` to refine. Same names in CI where wired, so a script means the same thing whether a person or a pipeline runs it.
+
+| Verb | Meaning |
+|---|---|
+| `setup` | install + seed `.env.local` from `.env.example` if missing |
+| `install:clean` | wipe `node_modules` (+ any in-repo workspace modules, build cache); reinstall |
+| `sync:secrets:staging` / `sync:secrets:production` | secret-manager import for that environment — only if a secret manager is in play |
+| `dev` | local dev server |
+| `dev:docker` | containerised local dev profile, only if one exists |
+| `build` | production build |
+| `start` | run the production build |
+| `test` | unit tests |
+| `test:e2e` | end-to-end tests |
+| `lint` / `lint:fix` | linter (root + in-repo packages) |
+| `typecheck` | type check, no emit (root + in-repo packages) |
+| `check` | `check:entry-files` → `lint:fix` → `lint` → `typecheck` — the pre-push gate (`dev-checks.mdc`) |
+| `check:entry-files` | fail if `CLAUDE.md` / `AGENTS.md` / `PROJECT_RULES.md` differ |
+| `setup:hooks` | set `core.hooksPath` to `.githooks`; also run from `setup` and `postinstall` |
+| `pipeline` / `predeploy` | chained gate: branch-base check, typecheck, lint, test, build, e2e — green before merge |
+| `pull:env` | pull host env into `.env.local` (Vercel: `vercel env pull .env.local --yes`) — only if a host env store exists |
+| `db:generate` / `db:migrate` / `db:seed` / `db:studio` | schema tooling, only if there is a DB |
+
+Keep `typecheck` as its own script even once `pipeline` exists — CI steps run it standalone for fast failure. Merge gate: `predeploy.mdc`.
+
+No `pull:packages`/`pull:design`/`pull:lib`/`dev:design` verbs once a shared package tier exists — a shared package comes from its registry pin only, never a pulled/linked local checkout.

@@ -1,0 +1,38 @@
+---
+description: Operator error pages and validation copy
+globs:
+  - **/error.tsx
+  - **/not-found.tsx
+  - **/global-error.tsx
+  - **/ErrorPageView.tsx
+  - **/InlineErrorView.tsx
+alwaysApply: false
+---
+
+# Error pages + validation
+
+Operators, not engineers. Status pages + field errors stay plain English.
+
+## Full-page errors (400s / 500s only)
+
+No 2xx/3xx pages. Layout: one large `<h1>`, `max-w-3xl`, left, `<p>` body. No breadcrumbs (`data-error-page`). No red text. No HTTP codes in UI (`404`, `500`, `Bad Request`). No humour (`Oops`). No blame. No vague “technical difficulties” / “maintenance” / “improvements”.
+
+`<title>`: `{H1} – Content Studio`.
+
+Always say next step. **Back** (history) and **Home** `/`. Docs `/documentation`.
+
+| Case | H1 | Body |
+|---|---|---|
+| Missing URL | `Page not found` | Typed address: check it. Pasted: copy the whole address. Still wrong: home or docs. |
+| Unexpected failure | `Sorry, there is a problem with the service` | Try again later. Work is saved. Docs if they need help now. |
+| Service closed | `Sorry, the service is unavailable` | When it returns (or “later”). Whether work is saved. Other way to finish. |
+
+Views: `NotFoundPageView`, `ServiceProblemPageView`, `ErrorPageView`.
+
+## Validation + inline errors
+
+Human line first. What to do, not what broke. Developer / provider / Zod JSON / stack / HTTP codes: collapsed `ErrorDetails` (`Technical details`).
+
+- Fields: `FieldError` (destructive). Zod `customError` in `configureZodErrors` — never default “Too small: expected…”.
+- Form / section / query: `InlineErrorView` or `ErrorCard` `message` + `details`.
+- Persist raw in DB if needed. Present at UI via `presentError`.

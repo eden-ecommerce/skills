@@ -1,0 +1,88 @@
+---
+description: Monorepo placement and import boundaries
+alwaysApply: true
+---
+
+See `docs/private/ARCHITECTURE.md`. Gates in `.cursor/STRUCTURE.md`.
+
+## Repo layout (single Next app at root)
+
+Product code lives at repo root — not under `apps/studio`.
+
+| Path | Role |
+|------|------|
+| `app/` | Next.js routes (thin; compose features) |
+| `features/` | Operator jobs (`<entity>-<objective>/`) + `studio-shell` chrome |
+| `data/` | `data/gates/` + `data/<Entity>/{dto,dpo,dal}` |
+| `domain/` | Business rules, Build, AI contracts — no UI |
+| `services/` | Processors, env, `services/db` pool |
+| `drizzle/` | Schema + migrations |
+| `utilities/` | Root shared pure helpers |
+| `stores/` | Client stores |
+| `renderers/` | Shared render helpers |
+
+In-repo pnpm workspaces: `packages/plugins/*`, `packages/libraries/*` only.
+
+`@eden-ecommerce/design` and `@eden-ecommerce/lib` are **exact GitHub Packages semver pins** in root `package.json` — not workspace members, not gitignored clones. Work in those repos, publish, bump pin here.
+
+Storybook lives in **`eden-ecommerce/design`** repo — not this tree.
+
+**Not applicable here:** React Native / generic mobile structure guides (`navigation/`, `themes/`, `components/`, `locales/`, `assets/`, `utils/` as app layers). Routing is `app/`; UI comes from `@eden-ecommerce/design`.
+
+**Not used:** `workflows/`, `'use workflow'`, `domain/plugins`, `domain/pipeline`, `domain/workflow-engine`.
+
+## Feature MVC (`features/<entity>-<objective>/`)
+
+Feature folders are **operator jobs**, not entity dumps. Noun-first: `brand-browse`, `tenant-create`, `build-step-workspace`.
+
+```text
+features/{entity}-{objective}/
+  models/              Zod for this job only
+  views/pages/         one page (or none if the route composes)
+  views/components/    presentational TSX
+  views/phases/<phase>/ optional multi-phase workspace panels
+  controllers/         Formik + list controllers
+  hooks/               non-form UI hooks
+  api/                 TanStack Query for this job
+  utilities/           pure helpers — not in views/
+  types/               only if not inferable from models
+  tests/               Vitest for this job — never `*.test.ts` beside source
+  config.ts            optional
+  config/              optional (e.g. manifest modules)
+```
+
+Omit empty dirs. Shared chrome stays `features/studio-shell`. Shared business rules stay `domain/`. Build lives in `domain/build/pipeline` (one runner for every step) and `domain/build/steps/{step}/tasks/{task}` (code tasks). Deliver send rules live in `domain/deliver` and `features/deliver-send`.
+
+Server actions: `data/<Capability>/`. Thin. Business rules in `domain/`.
+
+## Import law (layers)
+
+Enforced in `eslint.config.mjs` via `eslint-plugin-boundaries` and `import/no-cycle` (**maxDepth 6**). Matches `.cursor/rules/layers.mdc`.
+
+```
+feature / app     → data actions, domain, services
+data actions      → dpo, dto, dal, domain, services
+dpo               → gates, dal, dto
+dto               → (pure)
+dal               → services/db, drizzle
+domain/<entity>   → services, utilities   (NOT data, NOT drizzle, NOT sibling domain)
+services          → utilities, data/*/dal, packages/plugins
+services/db       → drizzle (pool / migrate / probe only)
+```
+
+Domain never drizzle. Services query only via `data/*/dal` except `services/db`.
+
+App/features also import `@eden-ecommerce/design`, `@eden-ecommerce/lib`, and in-repo `@content-studio/plugin-*` / `@content-studio/library-*` (plugins → libraries only; acyclic).
+
+Forbidden: design → app. domain → feature. libraries → plugins. plugins → app. library import cycles. feature → sibling feature **views/pages** or **controllers**. Barrel `index.ts` re-exports. Design/lib root import (`@eden-ecommerce/design` barrel).
+
+`app/(withWrapper)/` routes may **compose** multiple objectives (browse page + create button). Features must not import sibling internals.
+
+Deep imports only. Folder-per-component in design: `{Name}/{Name}`.
+
+PR: correct layer, no forbidden imports, no new barrels, `pnpm lint` passes boundaries.
+
+## Pages
+
+`app/(withWrapper)/` routes thin. Compose feature `views/pages/*`.
+Bare galleries / previews use `app/(withoutWrapper)/` (no Studio shell).

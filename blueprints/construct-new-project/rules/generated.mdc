@@ -1,0 +1,7 @@
+---
+description: Generated code
+globs: generated/**
+alwaysApply: false
+---
+
+Read-only. Do not hand-edit. Regenerate from source tool. Wrap in feature/domain hooks before UI use.

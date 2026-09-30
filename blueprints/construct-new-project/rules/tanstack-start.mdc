@@ -1,0 +1,18 @@
+---
+description: TanStack Start stack law — routes, server functions, env, Nitro, ports
+globs: src/routes/**,vite.config.ts,src/server.ts,**/*.server.ts
+alwaysApply: false
+---
+
+# TanStack Start
+
+Only when root `package.json` lists `@tanstack/react-start`. Full checklist: `docs/config/tanstack-start.md`.
+
+- Routes: `src/routes/` file-based (TanStack Router). Route-only UI colocated in `-components/` / `-sections/` beside the route.
+- Server code: `*.server.ts` only; server functions via `createServerFn`, thin, calling `domain/` (layer law: `layers.mdc`). Never import a `.server.ts` file into client code.
+- Client env: `import.meta.env.VITE_*` only. Server env: read in `*.server.ts`, never in a component.
+- Links/redirects: router `Link` / `redirect({ to })` — never a raw `<a href="/…">` for internal routes.
+- Assets: Vite imports. No `next/*` imports anywhere.
+- Dev + Playwright port `5173`, `strictPort: true`.
+- Nitro (or the deploy adapter) is **build-only** in `vite.config.ts` — never active during `vite dev`, or the v0/Lovable preview breaks.
+- Ship gate: `check` + `build` (no `predeploy`). Vercel: `"framework": "tanstack-start"` (`docs/environment/vercel.md`).

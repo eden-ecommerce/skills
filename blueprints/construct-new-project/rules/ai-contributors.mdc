@@ -1,0 +1,47 @@
+---
+description: AI-builder contribution law (v0, Lovable, Cursor, Claude Code) — guard rails so non-engineers can ship safely
+alwaysApply: true
+---
+
+# AI contributors
+
+Designers and other developers contribute through v0, Lovable, Cursor, or Claude Code. The repo — not the tool — holds the rules. Every rule here is enforced by `dev-checks.mdc` or a lint rule; if it can't be enforced, it's a suggestion and must not be written here.
+
+## Tool-agnostic entry points
+
+| File | Read by | Holds |
+|---|---|---|
+| `CLAUDE.md` | Claude Code | pointer only |
+| `AGENTS.md` | Codex + any generic agent | pointer only |
+| `PROJECT_RULES.md` | v0 | pointer only |
+| `.cursor/rules/*.mdc` | Cursor (loads `alwaysApply` itself); everything else is pointed here | **all rules** |
+| `docs/` | everyone, via the rules | config, environment, architecture |
+
+The three entry files are byte-identical copies (`check-entry-files` fails `check` on drift) and list the always-on rules to read first.
+
+Keep rules under `.cursor/rules/` only. Never create per-tool copies (`.v0/`, `.lovable/` rule text) — they drift. Tool config files (e.g. `.lovable/project.json`) hold tool settings, never rules.
+
+## Rules for any AI-authored change
+
+1. Read `AGENTS.md` → `.cursor/rules/` → `docs/CONTEXT.md` before the first edit.
+2. Match existing patterns: reuse a component/helper before writing one (`general.mdc` DRY).
+3. Run `check` before handing back. "It renders in the preview" is not done — the preview tolerates TypeScript errors that CI and host checks reject.
+4. Small, single-purpose branches. One feature or one visual change per PR; PR body from the template (`pull-requests.mdc`).
+5. Design/UI-only contributors touch `features/*/views/**`, `components/**`, styles, and copy. Data, domain, services, env, config, lockfile, and CI files need an engineer's review.
+6. Never add a dependency to fix a styling or layout problem. Tokens live in `theme.mdc`; use them.
+7. Never commit secrets, `.env*`, or generated output (`generated.mdc`).
+8. Preview-only demo routes (sandbox, versioned iterations) never ship to a production route — see the project's routing rule if it has one.
+
+## Protected paths
+
+Changes to these need explicit reviewer sign-off, whoever (or whatever) wrote them:
+
+`package.json`, lockfile, `vercel.json`, `.github/**`, `.githooks/**`, `eslint.config.*`, `tsconfig*.json`, framework config (`next.config.*`, `vite.config.*`), `.env.example`, `.cursor/rules/**`.
+
+## Lovable / v0 specifics
+
+- Keep the repo's own framework config. Do not let a builder swap in its wrapper config or scaffold a second framework.
+- Dev port is fixed (Next `3000`, TanStack Start `5173` with `strictPort`) and Playwright must match — builders assume it.
+- Builders that can't reach the private registry can't use private shared packages: record that in `docs/CONFIG.md` (`Lovable: yes|no`) and don't add private-registry deps to a builder-edited repo.
+- Builder commits land on a branch and go through CI like anyone else's. No direct pushes to `main`.
+- After a builder session, expect: unused imports, inline styles, `any`, duplicated components. `lint:fix` + `check` catches most; review the rest against `general.mdc`.
