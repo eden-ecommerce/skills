@@ -43,7 +43,20 @@ docs/feature/{feature}/
 | `/sync-plan` | Sub complete | updated master + sync log (`/ponytail-audit`) |
 | `/merge-plan` | All subs done | MR description |
 
-All orchestration skills start `/caveman ultra`. Build uses `/ponytail` (per sub-plan Build block).
+All orchestration skills in the table above start `/caveman ultra`. Build uses `/ponytail` (per sub-plan Build block).
+
+### Review
+
+These two also live in `orchestration/`. They do not start `/caveman ultra`.
+
+| Invoke | When |
+|--------|------|
+| `/review-comments` | Unresolved comments on the open pull request |
+| `/reflect-review` | After `/review-comments`, or on its own over the same pull request |
+
+`/review-comments` fetches unresolved pull request comments via GitHub MCP, suggests a change or a question for each, then after you pick comments implements them, replies on each thread, and posts one top-level comment of your decisions. It does not resolve threads. It then asks whether to run `/reflect-review`.
+
+`/reflect-review` turns reviewer patterns into guards in the repo's `.cursor/rules/`, writes only the ones you approve, and lists any detected patterns it did not add. If `/review-comments` already ran in the chat, it uses that. Otherwise it fetches every review comment on the open pull request, resolved and unresolved, and compares each thread's diff with the current file.
 
 ## Blueprint skills
 
