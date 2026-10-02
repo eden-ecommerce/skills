@@ -1,6 +1,6 @@
 ---
 name: vertically-slice-changes
-description: Guides feature planning and implementation using vertical slicing, stacked git pull requests, and failure-recovery protocols. Use when breaking large tasks into small, testable, end-to-end pull requests, writing each pull request so it can be tested and deployed on its own, managing stacked branches with GitHub CLI (`gh` / `gh stack`), or handling stack collapse and local backup branches.
+description: Guides feature planning and implementation using vertical slicing, stacked git pull requests or GitLab merge requests, and failure-recovery protocols. Use when breaking large tasks into small, testable, end-to-end pull requests or merge requests, writing each one so it can be tested and deployed on its own, managing stacked branches with GitHub CLI (`gh` / `gh stack`) or GitLab CLI (`glab`), or handling stack collapse and local backup branches.
 agents:
   - cursor
 ---
@@ -9,7 +9,7 @@ agents:
 
 ## Core Philosophy
 - **Vertical Slicing:** Every pull request delivers a thin, complete, functional end-to-end increment (DB/schema, API, and UI together) rather than architectural horizontal layers.
-- **Stacked PRs:** Each slice branches off the preceding slice (`Slice 1` -> `Slice 2` -> `Slice 3`). Work on downstream slices immediately without waiting for lower PR code review approvals.
+- **Stacked pull requests or merge requests:** Each slice branches off the preceding slice (`Slice 1` -> `Slice 2` -> `Slice 3`). Work on downstream slices immediately without waiting for lower review approvals.
 - **Defensive Slicing:** Every slice MUST compile, pass tests, and remain safe in production via feature flags or dormant routes.
 
 ---
@@ -28,15 +28,22 @@ Before modifying any code, present a **Vertical Slice Plan** conforming to these
 
 ## Phase 2: Stacked Git Branch Execution
 
-Branch Hierarchy:
+Read the host from `git remote get-url origin`. A `github.com` URL uses the GitHub path. A GitLab URL uses the GitLab path. If the host is unclear, ask before creating branches.
+
+Branch hierarchy is the same on both hosts. Each review targets the branch under it:
+
 ```text
 main
- └── feature/<name>/slice-1-base     (PR #1 -> base: main)
-      └── feature/<name>/slice-2-core  (PR #2 -> base: feature/<name>/slice-1-base)
-           └── feature/<name>/slice-3-ui    (PR #3 -> base: feature/<name>/slice-2-core)
+ └── feature/<name>/slice-1-base     (review 1 -> base: main)
+      └── feature/<name>/slice-2-core  (review 2 -> base: feature/<name>/slice-1-base)
+           └── feature/<name>/slice-3-ui    (review 3 -> base: feature/<name>/slice-2-core)
 ```
 
-Requires `gh` and the extension `gh extension install github/gh-stack`. Pass branch names exactly as above. `gh stack` does not rewrite them.
+Commit with `git add` and `git commit` so each slice contains only its own files. Pass branch names exactly as above.
+
+### GitHub
+
+Requires `gh` and the extension `gh extension install github/gh-stack`. `gh stack` does not rewrite the branch names.
 
 Run every `gh stack` command non-interactively, or it hangs:
 
@@ -56,25 +63,43 @@ gh stack submit --auto --remote origin
 gh stack view --json
 ```
 
-Commit with `git add` and `git commit` so each slice contains only its own files. To change an earlier slice, `gh stack checkout` that branch, commit there, then `gh stack rebase --upstack` and `gh stack push --remote origin`.
+To change an earlier slice, `gh stack checkout` that branch, commit there, then `gh stack rebase --upstack` and `gh stack push --remote origin`.
+
+### GitLab
+
+Requires `glab`, installed and authenticated. `glab stack` is experimental and names its own branches, so do not use it for this workflow. Create the named branches and open each merge request with the parent as the target.
+
+```bash
+git checkout -b feature/<name>/slice-1-base main
+# commit slice 1 only
+git push -u origin HEAD
+glab mr create --source-branch feature/<name>/slice-1-base --target-branch main --title "<title>" --draft --yes --description-file /tmp/slice-1.md
+
+git checkout -b feature/<name>/slice-2-core
+# commit slice 2 only
+git push -u origin HEAD
+glab mr create --source-branch feature/<name>/slice-2-core --target-branch feature/<name>/slice-1-base --title "<title>" --draft --yes --description-file /tmp/slice-2.md
+```
+
+To change an earlier slice, check out that branch, commit there, rebase the branches above it, then `git push --force-with-lease` each rewritten branch. Do not use `--force` without `--force-with-lease`.
 
 ---
 
-## Phase 3: Pull request text, then deploy one slice at a time
+## Phase 3: Review text, then deploy one slice at a time
 
-`gh stack submit --auto` opens the stack. The generated title and body are not the review text. Before anyone is asked to review, set each pull request body with `gh pr edit`.
+Opening the stack does not write the review text. On GitHub, `gh stack submit --auto` opens draft pull requests. On GitLab, `glab mr create` opens the merge requests. Before anyone is asked to review, set each body. On GitHub use `gh pr edit`. On GitLab use `glab mr update <id> --description-file <file> --yes`.
 
-A developer should be able to test this slice without reading the other pull requests.
+A developer should be able to test this slice without reading the other reviews.
 
 A slice that does not compile is not a slice. Land a file after the files it imports. Each slice stays safe to deploy on its own, through a feature flag, a dormant route, or an additive change. If a slice cannot be deployed alone, say so in the body and split the slice until it can.
 
-Write the body in plain sentences. Do not use em dashes. Do not use filler such as "ensuring" or "highlighting". Do not start a line with a bold label that repeats the sentence. Do not paste a Cloud Run, Drizzle, or terraform checklist into a repo that does not have those. Use those lines only when that repo deploys that way.
+Write the body in plain sentences. Do not use em dashes. Do not use filler such as "ensuring" or "highlighting". Do not start a line with a bold label that repeats the sentence. The body is [references/pull_request_template.md](references/pull_request_template.md), filled for this slice, in that file's order. Where a section names a system this repo does not have (Cloud Run, Drizzle, terraform, a shared MySQL migrate), write "none" for that line. Do not delete the heading.
 
-Each body uses these sections, in this order.
+Use the notes below when filling the matching headings for a slice.
 
 ### Summary
 
-One or two sentences on what this slice changes and why.
+Fill the Summary section of [references/pull_request_template.md](references/pull_request_template.md). That section is one or two sentences on what this slice changes and why. Do not invent a different summary shape.
 
 ### Scope
 
@@ -89,7 +114,7 @@ Numbered checks for this branch only. Name the command, the URL, and the click p
 1. Merge this pull request only.
 2. Deploy this slice. Name the real command for this repo.
 3. Run the dev test plan on the deployed result.
-4. Run `gh stack sync --remote origin` so the next pull request targets `main`.
+4. Point the next review at `main`. On GitHub, run `gh stack sync --remote origin`. On GitLab, rebase the next branch onto `main`, run `git push --force-with-lease`, then `glab mr update <id> --target-branch main --yes`.
 5. Do not merge the next slice until this one has been deployed and tested.
 
 Design and lib publish with Changesets and a `design-v*` or `lib-v*` tag. A consumer then pins that exact version. An app deploys on its own host. Write that path in the body. Do not invent a host.
@@ -98,34 +123,14 @@ Design and lib publish with Changesets and a `design-v*` or `lib-v*` tag. A cons
 
 How to undo this slice without undoing the slices above it.
 
+Fill [references/pull_request_template.md](references/pull_request_template.md) for this slice, then set the body from that file.
+
 ```bash
-gh pr edit <number> --body "$(cat <<'EOF'
-## Summary
+# GitHub
+gh pr edit <number> --body-file <filled-template>
 
-<one or two sentences>
-
-## Scope
-
-<what is in this pull request, what is left for a later slice, package pin if any, safe to ship on its own or not>
-
-## Dev test plan
-
-1. [ ] <command, URL, and click path for this branch only>
-2. [ ] <what this slice cannot show yet>
-
-## Deployment plan
-
-1. [ ] Merge this pull request only.
-2. [ ] Deploy this slice with <real command for this repo>.
-3. [ ] Run the dev test plan on the deployed result.
-4. [ ] `gh stack sync --remote origin` so the next pull request targets `main`.
-5. [ ] Do not merge the next slice until this one has been deployed and tested.
-
-## Reversion plan
-
-<how to undo this slice without undoing the slices above it>
-EOF
-)"
+# GitLab
+glab mr update <id> --description-file <filled-template> --yes
 ```
 
 ---
@@ -134,20 +139,30 @@ EOF
 
 Collapse is a merged lower slice (including a squash merge) leaving the branches above it without their parent commits.
 
+### GitHub
+
 1. Do not `git push --force` and do not retarget bases by hand.
-2. Run `gh stack sync --remote origin`. It fetches, rebases upward (using `--onto` after a squash merge), retargets each open PR, and pushes.
+2. Run `gh stack sync --remote origin`. It fetches, rebases upward (using `--onto` after a squash merge), retargets each open pull request, and pushes.
 3. Exit code 3 means a conflict and that every branch was restored to its pre-rebase state. Resolve, then `gh stack rebase --continue`. Repeat per conflict. If the resolution is wrong, `gh stack rebase --abort`.
-4. After the stack is green, `gh stack sync --prune --remote origin` drops local branches whose PRs have merged.
-5. Confirm with `gh stack view --json`: merged slices show `isMerged: true`, and the next open PR's base is the new parent (or `main`).
+4. After the stack is green, `gh stack sync --prune --remote origin` drops local branches whose pull requests have merged.
+5. Confirm with `gh stack view --json`: merged slices show `isMerged: true`, and the next open pull request's base is the new parent (or `main`).
+
+### GitLab
+
+1. Do not `git push --force` without `--force-with-lease`.
+2. Rebase each open branch onto its new parent. After a squash merge, use `git rebase --onto <new-parent> <old-parent> <branch>`.
+3. On a conflict, resolve it, then `git rebase --continue`. If the resolution is wrong, `git rebase --abort`.
+4. `git push --force-with-lease` each rewritten branch, then `glab mr update <id> --target-branch <new-parent> --yes`.
+5. Confirm the next open merge request targets the new parent (or `main`). Delete local branches whose merge requests have merged.
 
 ---
 
 ## Phase 5: Local backup branches
 
-Take a local backup before `gh stack sync` or `gh stack rebase` when a lower slice has merged or `gh stack view --json` shows the stack has diverged. Do not push the backup and do not open a pull request for it.
+Take a local backup before a stack sync or rebase when a lower slice has merged or the stack has diverged. Do not push the backup and do not open a review for it.
 
-1. For each open branch, read its SHA from `gh stack view --json`.
+1. For each open branch, read its SHA. On GitHub, read it from `gh stack view --json`. On GitLab, read it with `git rev-parse <branch>`.
 2. `git branch backup/<branch> <sha>`.
 3. Run the stack collapse phase.
 4. If recovery is aborted, the backup branch still holds the old commits. Reset or cherry-pick from `backup/<branch>`.
-5. When `gh stack view --json` shows the recovered PRs open and pushed, delete each `backup/<branch>` locally.
+5. When the recovered reviews are open and pushed, delete each `backup/<branch>` locally.
