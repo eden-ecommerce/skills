@@ -5,7 +5,7 @@ description: Fetch unresolved review comments on the current branch's pull reque
 
 # review-comments
 
-Report first. Edit files only for comments the user selects in step 8. Post replies and the context comment only after those edits are done, and only after the user approves the drafts.
+Report first. Edit files only for comments the user selects in step 8. After the edits, ask whether the user is happy with the changes. Do not draft or post GitHub replies, or the context comment, until they say yes. Then show drafts and wait again before posting.
 
 ## 1. Resolve repo and branch
 
@@ -91,16 +91,18 @@ Use `AskQuestion` with **allow_multiple: true**: list each comment by number and
 
 Do not apply comments classified **Need more information** unless the user explicitly asks.
 
-## 9. Implement and reply
+## 9. Implement, then confirm, then reply
 
 Only after the user selects comments in step 8:
 
 1. Implement only the selected comments, following the repo's rules. Keep each change minimal and targeted.
-2. Run the repo's checks that apply to the touched files, and report any failures. Do not post a reply for a comment whose change fails checks.
-3. Discover the reply tool via `GetDynamicTools` on the GitHub namespace. Look for a tool that replies to a pull request review thread or comment. Do not hard-code its name. Reply using the thread node id or latest comment id kept in step 4.
-4. Draft one reply per implemented comment and show all drafts to the user in one block. Wait for approval before posting anything.
-5. Post each approved reply. Never resolve a thread. Never reply to a **Need more information** comment unless the user explicitly asks.
-6. Report which threads got a reply, with links.
+2. Run the repo's checks that apply to the touched files, and report any failures.
+3. Summarise what changed, in a short list. Use `AskQuestion` to ask whether the user is happy with the changes. Options: happy, proceed to reply drafts; not happy, they will say what to change. **Stop here.** Do not draft or post any GitHub reply or context comment until they say they are happy.
+4. If they are not happy, change the code they name and return to step 3. Do not draft replies for a comment whose change fails checks or that they have rejected.
+5. Once they are happy, discover the reply tool via `GetDynamicTools` on the GitHub namespace. Look for a tool that replies to a pull request review thread or comment. Do not hard-code its name. Reply using the thread node id or latest comment id kept in step 4.
+6. Draft one reply per implemented comment and show all drafts to the user in one block. Wait for approval before posting anything.
+7. Post each approved reply. Never resolve a thread. Never reply to a **Need more information** comment unless the user explicitly asks.
+8. Report which threads got a reply, with links.
 
 Reply format. Short, plain, British English, no emojis:
 
@@ -113,7 +115,7 @@ Mention the commit only if the user has already committed. Do not push or commit
 
 ## 10. Record context
 
-After step 9:
+Only after the user has said they are happy with the changes (step 9) and the thread replies are posted:
 
 1. Collect only the decisions and instructions the user gave in this chat about how to implement the selected comments (answers to `AskQuestion`, explicit directions such as a chosen name or library). Leave out reasoning, chatter, and anything about unselected comments.
 2. If the user gave no such guidance, skip this step and say so.
@@ -137,5 +139,6 @@ After step 10, use `AskQuestion` to ask whether to run `/reflect-review` now, so
 - Push, merge, or open PRs.
 - Resolve review threads (the reviewer does this).
 - Use `gh` or REST when GitHub MCP is unavailable (stop and ask to connect MCP instead).
+- Draft or post any GitHub reply or comment before the user has said they are happy with the code changes.
 - Post any reply or comment without showing the draft first.
 - Reply to comments classified **Need more information** unless the user explicitly asks.
