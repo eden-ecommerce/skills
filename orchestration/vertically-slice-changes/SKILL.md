@@ -93,23 +93,29 @@ A developer should be able to test this slice without reading the other reviews.
 
 A slice that does not compile is not a slice. Land a file after the files it imports. Each slice stays safe to deploy on its own, through a feature flag, a dormant route, or an additive change. If a slice cannot be deployed alone, say so in the body and split the slice until it can.
 
-Write the body in plain sentences. Do not use em dashes. Do not use filler such as "ensuring" or "highlighting". Do not start a line with a bold label that repeats the sentence. The body is [references/pull_request_template.md](references/pull_request_template.md), filled for this slice, in that file's order. Where a section names a system this repo does not have (Cloud Run, Drizzle, terraform, a shared MySQL migrate), write "none" for that line. Do not delete the heading.
-
-Use the notes below when filling the matching headings for a slice.
+Write the body in plain sentences. Do not use em dashes. Do not use filler such as "ensuring" or "highlighting". Do not start a line with a bold label that repeats the sentence. The body uses only these headings from [references/pull_request_template.md](references/pull_request_template.md): Summary, Scope, Dev test plan, Deployment plan, Reversion plan. Leave the other headings in that file out of the review. Where one of these five names a system this repo does not have, write "none" for that line. Do not delete the heading.
 
 ### Summary
 
-Fill the Summary section of [references/pull_request_template.md](references/pull_request_template.md). That section is one or two sentences on what this slice changes and why. Do not invent a different summary shape.
+Heading in the template: `## Summary`.
+
+One or two sentences on what this slice changes and why. Do not invent a different summary shape.
 
 ### Scope
+
+Heading in the template: `## Scope`.
 
 What is in this pull request. What is left for a later slice. The package pin, if this slice changes one. Whether this change is safe to ship on its own.
 
 ### Dev test plan
 
+Heading in the template: `## Dev test plan`.
+
 Numbered checks for this branch only. Name the command, the URL, and the click path. Mark what this slice cannot show yet.
 
 ### Deployment plan
+
+Heading in the template: `## Deployment plan`.
 
 1. Merge this pull request only.
 2. Deploy this slice. Name the real command for this repo.
@@ -120,6 +126,8 @@ Numbered checks for this branch only. Name the command, the URL, and the click p
 Design and lib publish with Changesets and a `design-v*` or `lib-v*` tag. A consumer then pins that exact version. An app deploys on its own host. Write that path in the body. Do not invent a host.
 
 ### Reversion plan
+
+Heading in the template: `## Reversion plan`.
 
 How to undo this slice without undoing the slices above it.
 
