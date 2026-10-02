@@ -1,11 +1,11 @@
 ---
 name: review-comments
-description: Fetch unresolved review comments on the current branch's pull request via GitHub MCP, explain each with a suggested change or a question, then after the user picks comments, implement them and post a reply on each thread plus one top-level comment of the user's decisions. Use when the user says /review-comments or asks for PR comments on this branch.
+description: Fetch unresolved review comments on the current branch's pull request via GitHub MCP, explain each with a suggested change or a question, then after the user picks comments, implement them. Once they say they are happy, commit and push, then post a reply on each thread plus one top-level comment of the user's decisions. Use when the user says /review-comments or asks for PR comments on this branch.
 ---
 
 # review-comments
 
-Report first. Edit files only for comments the user selects in step 8. After the edits, ask whether the user is happy with the changes. Do not draft or post GitHub replies, or the context comment, until they say yes. Then show drafts and wait again before posting.
+Report first. Edit files only for comments the user selects in step 8. After the edits, ask whether the user is happy with the changes. Once they say yes, commit and push those changes, then show reply drafts and wait again before posting. Do not draft or post GitHub replies, or the context comment, until the push has succeeded.
 
 ## 1. Resolve repo and branch
 
@@ -91,18 +91,25 @@ Use `AskQuestion` with **allow_multiple: true**: list each comment by number and
 
 Do not apply comments classified **Need more information** unless the user explicitly asks.
 
-## 9. Implement, then confirm, then reply
+## 9. Implement, confirm, commit, push, then reply
 
 Only after the user selects comments in step 8:
 
 1. Implement only the selected comments, following the repo's rules. Keep each change minimal and targeted.
-2. Run the repo's checks that apply to the touched files, and report any failures.
-3. Summarise what changed, in a short list. Use `AskQuestion` to ask whether the user is happy with the changes. Options: happy, proceed to reply drafts; not happy, they will say what to change. **Stop here.** Do not draft or post any GitHub reply or context comment until they say they are happy.
-4. If they are not happy, change the code they name and return to step 3. Do not draft replies for a comment whose change fails checks or that they have rejected.
-5. Once they are happy, discover the reply tool via `GetDynamicTools` on the GitHub namespace. Look for a tool that replies to a pull request review thread or comment. Do not hard-code its name. Reply using the thread node id or latest comment id kept in step 4.
-6. Draft one reply per implemented comment and show all drafts to the user in one block. Wait for approval before posting anything.
-7. Post each approved reply. Never resolve a thread. Never reply to a **Need more information** comment unless the user explicitly asks.
-8. Report which threads got a reply, with links.
+2. Run the repo's checks that apply to the touched files, and report any failures. Do not commit a repo whose checks failed.
+3. Summarise what changed, in a short list. Use `AskQuestion` to ask whether the user is happy with the changes. Options: happy, commit and push; not happy, they will say what to change. **Stop here.** Do not commit, push, draft, or post until they say they are happy.
+4. If they are not happy, change the code they name and return to step 3.
+5. Once they are happy, commit and push before any GitHub reply:
+   - One commit per repo this round changed. Stage only the files from this round. Do not stage secrets (`.env`, credentials).
+   - Read `git log -5 --format=%s` in that repo and match that subject style. Pass the message with a HEREDOC. Do not use `--no-verify` or `--no-gpg-sign`.
+   - If the branch is `main` or `master`, stop and ask before committing.
+   - Push with `git push -u origin HEAD`. Do not force-push. If the push fails, stop and report it. Do not draft replies.
+   - If a repo has nothing new to commit, say so and still push when the branch is ahead of the remote.
+6. Tell the user the commit subject and the remote branch for each repo.
+7. Discover the reply tool via `GetDynamicTools` on the GitHub namespace. Look for a tool that replies to a pull request review thread or comment. Do not hard-code its name. Reply using the thread node id or latest comment id kept in step 4.
+8. Draft one reply per implemented comment and show all drafts to the user in one block. Wait for approval before posting anything.
+9. Post each approved reply. Never resolve a thread. Never reply to a **Need more information** comment unless the user explicitly asks.
+10. Report which threads got a reply, with links.
 
 Reply format. Short, plain, British English, no emojis:
 
@@ -111,7 +118,7 @@ Done: <one-line summary of the change>.
 Changed: `path/to/file.tsx` (<what, in a few words>).
 ```
 
-Mention the commit only if the user has already committed. Do not push or commit for them.
+Name the commit subject in the reply when it helps the reviewer find the push.
 
 ## 10. Record context
 
@@ -136,7 +143,9 @@ After step 10, use `AskQuestion` to ask whether to run `/reflect-review` now, so
 
 ## Do not
 
-- Push, merge, or open PRs.
+- Merge, or open a new pull request.
+- Force-push, or commit onto `main` or `master` without asking.
+- Commit or push before the user has said they are happy with the code changes.
 - Resolve review threads (the reviewer does this).
 - Use `gh` or REST when GitHub MCP is unavailable (stop and ask to connect MCP instead).
 - Draft or post any GitHub reply or comment before the user has said they are happy with the code changes.
