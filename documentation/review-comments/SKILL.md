@@ -128,6 +128,10 @@ Context for the changes in this round:
 - <decision or instruction, one line each, tagged with the comment it relates to, e.g. "debounce.ts: use lodash.debounce">
 ```
 
+## 11. Hand over to reflect-review
+
+After step 10, use `AskQuestion` to ask whether to run `/reflect-review` now, so repeated reviewer patterns become guards in the repo's Cursor rules. If the user says yes, read `../reflect-review/SKILL.md` and follow it with the comments from this run.
+
 ## Do not
 
 - Push, merge, or open PRs.

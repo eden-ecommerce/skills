@@ -67,9 +67,11 @@ Path: [`blueprints/add-publisher-panel/`](blueprints/add-publisher-panel/). Star
 
 Path: [`rules/core-web-vitals-excellence/`](rules/core-web-vitals-excellence/). Compose: `node rules/core-web-vitals-excellence/scripts/compose-cursorrules.mjs <nextjs|lovable> <repo-path>`.
 
-**Documentation** (`documentation/`): `/document-current-state`, `/document-database`, `/document-flow`, `/generate-changelog`, `/refine-rules`, `/generate-handoff-doc`, `/review-comments` — invoke separately when needed.
+**Documentation** (`documentation/`): `/document-current-state`, `/document-database`, `/document-flow`, `/generate-changelog`, `/refine-rules`, `/generate-handoff-doc`, `/review-comments`, `/reflect-review` — invoke separately when needed.
 
 `/review-comments` fetches unresolved pull request comments via GitHub MCP, suggests a change or a question for each, then after you pick comments implements them, replies on each thread, and posts one top-level comment of your decisions. It does not resolve threads.
+
+`/reflect-review` runs after `/review-comments` (it offers to). It turns repeated reviewer patterns into guards in the repo's `.cursor/rules/`, writes only the ones you approve, and lists any detected patterns it did not add.
 
 **Other**: `/generate-changelog` for deploy notes.
 
