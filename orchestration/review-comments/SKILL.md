@@ -1,6 +1,6 @@
 ---
 name: review-comments
-description: Fetch unresolved review comments on the current branch's pull request via GitHub MCP, explain each with a suggested change or a question, then after the user picks comments, implement them. Once they say they are happy, commit and push, then post a reply on each thread plus one top-level comment of the user's decisions. Use when the user says /review-comments or asks for PR comments on this branch.
+description: Fetch unresolved review comments on the current branch's pull request via GitHub MCP, explain each with a suggested change or a question, then after the user picks comments, implement them. Once they say they are happy, commit and push, then post a reply on each thread plus one top-level comment of the user's decisions, building up across stacked pull requests and flagging slices above that need restacking. Use when the user says /review-comments or asks for PR comments on this branch.
 ---
 
 # review-comments
@@ -47,7 +47,7 @@ Keep, for every thread, the thread node id and the id of its latest comment. Ste
 
 ## 5. Ground each inline comment in local code
 
-For each inline comment with a file path and line (or range), read that file locally at those lines before writing **What I think it does**. Do not guess from the comment alone.
+For each inline comment with a file path and line (or range), read that file locally at those lines before writing **What it does**. Do not guess from the comment alone. Put how sure you are of that reading in the heading, as a percentage (for example `99% confident`). Lower the percentage when the comment or the local code leaves the reading uncertain.
 
 ## 6. Classify each comment
 
@@ -68,7 +68,7 @@ One block per comment, separated by `---`. Number comments sequentially.
 ### 1. `path/to/file.tsx:42` — @reviewer
 > quoted comment (trimmed; preserve meaning)
 
-**What I think it does:** Plain-English link between the reviewer's point and the current code.
+**What it does (99% confident):** Plain-English link between the reviewer's point and the current code. Replace `99%` with how sure you are of that reading.
 
 **Suggested change:** Concrete edit — use a code citation for existing code or a short fenced block for the proposed fix.
 
@@ -106,10 +106,15 @@ Only after the user selects comments in step 8:
    - Push with `git push -u origin HEAD`. Do not force-push. If the push fails, stop and report it. Do not draft replies.
    - If a repo has nothing new to commit, say so and still push when the branch is ahead of the remote.
 6. Tell the user the commit subject and the remote branch for each repo.
-7. Discover the reply tool via `GetDynamicTools` on the GitHub namespace. Look for a tool that replies to a pull request review thread or comment. Do not hard-code its name. Reply using the thread node id or latest comment id kept in step 4.
-8. Draft one reply per implemented comment and show all drafts to the user in one block. Wait for approval before posting anything.
-9. Post each approved reply. Never resolve a thread. Never reply to a **Need more information** comment unless the user explicitly asks.
-10. Report which threads got a reply, with links.
+7. Check the stacked pull requests above this one:
+   - Using GitHub MCP, list open pull requests whose base branch is the branch just pushed. Repeat for each of those, so you cover every slice higher up the stack.
+   - For each, fetch its head branch and run `git merge-tree --write-tree --name-only HEAD origin/<its head branch>`. Record any conflicting files.
+   - Tell the user which pull requests need restacking and which files conflict. Do not rebase, restack, or force-push them without asking.
+   - If none exist, say so and skip the downstream comments in step 10.
+8. Discover the reply tool via `GetDynamicTools` on the GitHub namespace. Look for a tool that replies to a pull request review thread or comment. Do not hard-code its name. Reply using the thread node id or latest comment id kept in step 4.
+9. Draft one reply per implemented comment and show all drafts to the user in one block. Wait for approval before posting anything.
+10. Post each approved reply. Never resolve a thread. Never reply to a **Need more information** comment unless the user explicitly asks.
+11. Report which threads got a reply, with links.
 
 Reply format. Short, plain, British English, no emojis:
 
@@ -126,25 +131,38 @@ Only after the user has said they are happy with the changes (step 9) and the th
 
 1. Collect only the decisions and instructions the user gave in this chat about how to implement the selected comments (answers to `AskQuestion`, explicit directions such as a chosen name or library). Leave out reasoning, chatter, and anything about unselected comments.
 2. If the user gave no such guidance, skip this step and say so.
-3. Draft one top-level pull request comment (not a thread reply) and show it to the user. Wait for approval before posting.
-4. Post it with the GitHub MCP tool for adding a pull request or issue comment, discovered at runtime via `GetDynamicTools`. Do not hard-code its name.
-5. Never include secrets, tokens, local file paths outside the repo, or content from unrelated chats.
+3. Inherit earlier context. Find the latest top-level comment starting `Context for this stack` on this pull request. If there is none, use the one on the base pull request (the open pull request whose head branch is this one's base). Copy its sections unchanged, then add this round's lines under this pull request's heading.
+4. Draft one top-level pull request comment (not a thread reply) for this pull request. For each pull request above it from step 9.7, draft one more with the same sections plus a **Needs restack** list of its conflicting files. Show every draft to the user in one block. Wait for approval before posting.
+5. Post each approved comment with the GitHub MCP tool for adding a pull request or issue comment, discovered at runtime via `GetDynamicTools`. Do not hard-code its name.
+6. Never include secrets, tokens, local file paths outside the repo, or content from unrelated chats.
+
+Context lives in pull request comments only. Never commit it to a file in the repo.
 
 Comment format:
 
 ```markdown
-Context for the changes in this round:
+Context for this stack, up to #<this pull request number>:
+
+#<earlier pull request number> (<branch>):
+- <inherited line, unchanged>
+
+#<this pull request number> (<branch>), commit <short sha>:
 - <decision or instruction, one line each, tagged with the comment it relates to, e.g. "debounce.ts: use lodash.debounce">
+
+**Needs restack** (only on pull requests above this one):
+- `<conflicting file path>`
 ```
 
 ## 11. Hand over to reflect-review
 
-After step 10, use `AskQuestion` to ask whether to run `/reflect-review` now, so repeated reviewer patterns become guards in the repo's Cursor rules. If the user says yes, read `../reflect-review/SKILL.md` and follow it with the comments from this run.
+After step 10, or as soon as the user skips or postpones the replies or the context comment, use `AskQuestion` to ask whether to run `/reflect-review` now. Do not end the round without asking. Running it turns repeated reviewer patterns into guards in the repo's Cursor rules. If the user says yes, read `../reflect-review/SKILL.md` and follow it with the comments from this run.
 
 ## Do not
 
 - Merge, or open a new pull request.
 - Force-push, or commit onto `main` or `master` without asking.
+- Rebase or restack the pull requests above this one without asking.
+- Commit context to a file. It lives in pull request comments only.
 - Commit or push before the user has said they are happy with the code changes.
 - Resolve review threads (the reviewer does this).
 - Use `gh` or REST when GitHub MCP is unavailable (stop and ask to connect MCP instead).
