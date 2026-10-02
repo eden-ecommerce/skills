@@ -42,9 +42,9 @@ docs/feature/{feature}/
 | `/review-implementation` | After Build | audit report (`/ponytail-review`) |
 | `/sync-plan` | Sub complete | updated master + sync log (`/ponytail-audit`) |
 | `/merge-plan` | All subs done | MR description |
-| `/stacked-vertical-slice` | A change is too large for one review | Stacked pull requests, each with its own test and deploy steps |
+| `/vertically-slice-changes` | A change is too large for one review | Stacked pull requests, each with its own test and deploy steps |
 
-Path: [`orchestration/stacked-vertical-slice/`](orchestration/stacked-vertical-slice/). This skill does not start with `/caveman ultra`. The others do. Build uses `/ponytail` (per sub-plan Build block).
+Path: [`orchestration/vertically-slice-changes/`](orchestration/vertically-slice-changes/). This skill does not start with `/caveman ultra`. The others do. Build uses `/ponytail` (per sub-plan Build block).
 
 ## Blueprint skills
 

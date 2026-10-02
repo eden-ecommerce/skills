@@ -1,5 +1,5 @@
 ---
-name: stacked-vertical-slice
+name: vertically-slice-changes
 description: Guides feature planning and implementation using vertical slicing, stacked git pull requests, and failure-recovery protocols. Use when breaking large tasks into small, testable, end-to-end pull requests, writing each pull request so it can be tested and deployed on its own, managing stacked branches with GitHub CLI (`gh` / `gh stack`), or handling stack collapse and local backup branches.
 agents:
   - cursor
