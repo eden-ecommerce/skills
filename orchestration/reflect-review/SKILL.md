@@ -1,23 +1,31 @@
 ---
 name: reflect-review
-description: Turn pull request review comments handled by /review-comments into guards in the repo's Cursor rules, so the agent stops repeating the patterns reviewers flag. Proposes each guard, writes only the approved ones to `.cursor/rules/`, and reports the detected patterns in plain prose. Use after /review-comments, or when the user says /reflect-review or asks to stop reviewers making the same comments.
+description: Turn pull request review comments into guards in the repo's Cursor rules, so the agent stops repeating the patterns reviewers flag. Uses this chat when /review-comments already ran; otherwise fetches every review comment on the open pull request and compares each thread's diff with the current file. Proposes each guard, writes only the approved ones to `.cursor/rules/`, and reports the detected patterns in plain prose. Use when the user says /reflect-review, after /review-comments, or when they want reviewer comments turned into rules.
 ---
 
 # reflect-review
 
-Propose first. Write rule files only after the user approves.
+Propose first. Write rule files only after the user approves. Do not implement the review comments.
 
 ## 1. Collect the comments
 
-Use the comments from the `/review-comments` run in this chat, for this pull request only. For each, keep: file and line, reviewer, quoted comment, the outcome (**Suggested change** or **Need more information**), and what was actually changed.
+This pull request only.
 
-If `/review-comments` has not run in this chat, stop and ask the user to run it first.
+**`/review-comments` already ran in this chat.** Use its comments and the edits made for them. For each, keep the file and line, the reviewer, the quoted comment, the outcome (**Suggested change** or **Need more information**), and what was actually changed. Do not fetch them again.
+
+**It has not run.** Fetch them yourself. Do not ask the user to run `/review-comments`.
+
+1. Read `.git/HEAD` for the branch (`ref: refs/heads/...`) and `.git/config` for `remote "origin"`, then derive `owner/repo`. Prefer file reads over shell `git`. If the user gave a pull request URL or number, use that.
+2. Call `GetDynamicTools` with pattern `github`. Discover tool names at runtime. If no GitHub namespace is listed, or its status is `needsAuth` or `error`, stop and tell the user to connect GitHub MCP in Cursor Settings. Do not fall back to `gh`. If auth is needed, call `mcp_auth` for that namespace, then retry.
+3. Find the open pull request whose head branch matches the current branch. If none exists, stop and say the branch may not be pushed or has no open pull request.
+4. Fetch every review comment on it, resolved and unresolved. Skip authors whose login ends with `[bot]`, and the author's own replies that only acknowledge a thread.
+5. For each comment, read the diff hunk on the review thread, then the current file at those lines. The hunk is what the reviewer saw. Where the current file differs from that hunk, that difference is the change the comment caused. Where they still match, no change was made yet. Keep the comment anyway, because its wording can still be a pattern.
 
 ## 2. Find the patterns
 
 For each comment, ask: "If a rule had said this, would the agent have written the code correctly first time?"
 
-Keep a comment as a pattern when the fix generalises beyond this line. Typical examples: naming, import paths, file placement, design tokens, translation strings, accessibility, type safety, React Query or InstantSearch usage.
+Keep a comment as a pattern when the fix generalises beyond this line. A comment with no code change yet still counts when its wording states a rule that would have stopped the flagged code. Typical examples: naming, import paths, file placement, design tokens, translation strings, accessibility, type safety, React Query or InstantSearch usage.
 
 Discard it, and say why in one line, when it is:
 
@@ -72,7 +80,7 @@ A guard is short and tells the agent what to do, with code where code helps:
 Rules for the guard text:
 
 - One pattern per guard. Under 15 lines.
-- Use code from this pull request, trimmed to the essentials. No invented examples.
+- Use code from this pull request, trimmed to the essentials. No invented examples. The bad block comes from the review hunk. The good block comes from the current file, and only when that file actually differs.
 - State the rule, not its history. No pull request numbers, reviewer names, or dates in the rule file.
 - Match the tone, headings, and RFC 2119 words (MUST, SHOULD) the target file already uses.
 - Do not restate what a linter, the type checker, or an existing rule already enforces.
@@ -147,6 +155,7 @@ If `/unslop` is available, apply it. If not, check the text against these instea
 
 ## Do not
 
+- Implement review comments or edit application code.
 - Commit, push, or post anything to GitHub.
 - Write guards for skipped cards or unanswered **Need more information** comments.
 - Edit rules in repos other than the pull request's repo.
