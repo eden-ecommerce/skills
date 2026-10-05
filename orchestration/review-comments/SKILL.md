@@ -25,6 +25,18 @@ Then commit, push, and reply for the thread just finished. In Multitask Mode, ru
 
 Move a thread out of the current set only after the user has said they are happy with its diff. Once they have, the queue moves even while the push and reply are still running.
 
+The plan file has two views of the same threads: the todo list, and the Current threads section. Change both in the same edit. Updating a todo is not enough.
+
+After writing the plan, read the Current threads section back before you tell the user the plan is updated. All of these must be true:
+
+- Every pending todo is in Current threads, in the same order.
+- Every completed or ignored todo is absent from Current threads.
+- A pushed thread does not still say "local" or "not committed".
+- When a thread names a commit, the todo and Current threads use the same commit id.
+- The summary count matches the threads still in Current threads.
+
+If any check fails, fix the plan and read it again. Do not say the plan is updated until that read matches.
+
 ## 1. Resolve repo and branch
 
 From the working directory the user cares about (or repo root):
@@ -180,7 +192,7 @@ Context for this stack, up to #<this pull request number>:
 #<earlier pull request number> (<branch>):
 - <inherited line, unchanged>
 
-#<this pull request number> (<branch>), commit <short sha>:
+#<this pull request number> (<branch>), commit <commit id>:
 - <decision or instruction, one line each, tagged with the comment it relates to, e.g. "debounce.ts: use lodash.debounce">
 
 **Needs restack** (only on pull requests above this one):
