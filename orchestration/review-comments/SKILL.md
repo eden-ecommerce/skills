@@ -1,11 +1,23 @@
 ---
 name: review-comments
-description: Fetch unresolved review comments on the current branch's pull request via GitHub MCP, explain each with a suggested change or a question, then after the user picks comments, implement them. Once they say they are happy, commit and push, then post a reply on each thread plus one top-level comment of the user's decisions, building up across stacked pull requests and flagging slices above that need restacking. Use when the user says /review-comments or asks for PR comments on this branch.
+description: Fetch unresolved review comments on the current branch's pull request via GitHub MCP, explain each with a suggested change or a question, then after the user picks comments, implement them. Once they say they are happy, commit and push, then post a reply on each thread plus one top-level comment of the user's decisions, building up across stacked pull requests and flagging slices above that need restacking. Use when the user says /review-comments or asks for PR comments on this branch. When they ask to go through the whole lot of threads at once, switch to Plan mode first.
 ---
 
 # review-comments
 
 Report first. Edit files only for comments the user selects in step 8. After the edits, ask whether the user is happy with the changes. Once they say yes, commit and push those changes, then show reply drafts and wait again before posting. Do not draft or post GitHub replies, or the context comment, until the push has succeeded.
+
+## Whole queue
+
+When the user asks to go through the whole lot of threads at once (every open review, a stack of pull requests, or the rest of the threads), switch to Plan mode before any edit, commit, or push. Call SwitchMode with target `plan`. If you are already in Plan mode, stay there.
+
+Do not leave Plan mode to implement until the user accepts the current thread. Commit and push still wait until they say they are happy with that diff.
+
+In that plan:
+
+- Show only the current thread, in the step 7 format, and include its GitHub link.
+- Put each review the user has already agreed into the plan todos. Mark it completed only after it is pushed. Leave it pending when the change is still local, so a change they have not reviewed cannot be skipped.
+- List every later thread, from the next one through the last, as a bullet: link, a concise version of the comment, then the login of who left the thread.
 
 ## 1. Resolve repo and branch
 
@@ -25,9 +37,19 @@ Call `GetDynamicTools` with pattern `github` (or the connected GitHub namespace 
 - If no GitHub namespace is listed, or status is `needsAuth` / `error`: **stop**. Tell the user to connect or authenticate the GitHub MCP in Cursor Settings. **Do not fall back to `gh` CLI.**
 - If auth is needed, use `CallDynamicTool` with `mcp_auth` for that namespace, then retry.
 
+**Who posts.** GitHub MCP comments appear as whichever account is authenticated in Cursor (check with `get_me`). There is no “post as bot” switch in the skill. To use a machine user or GitHub App bot, connect MCP with that token or post from CI; tell the user before posting if they expected a bot identity.
+
 ## 3. Find the open PR
 
 Using GitHub MCP, find the **open** pull request whose head branch matches the current branch (same repo). If none exists, stop and say the branch may not be pushed or has no open PR.
+
+### Check the slices below before editing
+
+Do this as soon as the pull request is found, before step 9. A shallow clone can make the ancestor check fail: deepen with `git fetch --deepen` before trusting it.
+
+1. Note this pull request's base branch, and whether the pull request it stacks on is still open or already merged.
+2. Fetch that base. If `git merge-base --is-ancestor origin/<base> HEAD` is false, this branch is missing commits from below. Stop. Tell the user, and name the conflicting files from `git merge-tree --write-tree --name-only origin/<base> HEAD`. Do not edit until they say to restack.
+3. If the pull request below has merged, run the same check against the branch it merged into (usually `main`). Missing those commits means this branch still contains the pre-merge copy.
 
 ## 4. Fetch comments (unresolved scope)
 
@@ -116,11 +138,15 @@ Only after the user selects comments in step 8:
 10. Post each approved reply. Never resolve a thread. Never reply to a **Need more information** comment unless the user explicitly asks.
 11. Report which threads got a reply, with links.
 
-Reply format. Short, plain, British English, no emojis:
+Reply format. Short, plain, British English, no emojis. If the reviewer asked more than one thing in the thread (for example “split files?” and “add a rule?”), answer **each** in `Done:` or `Changed:` — do not merge them into one vague line.
+
+When the reviewer asked for a rule and `/reflect-review` (step 11) already added or strengthened a guard in this chat, say which rule file and section in `Changed:`. Do not write “we can add a rule if you want” after the rule is already in the repo.
+
+If thread replies are posted **before** reflect-review lands the rule, post a short follow-up on that thread once the guard is committed.
 
 ```markdown
-Done: <one-line summary of the change>.
-Changed: `path/to/file.tsx` (<what, in a few words>).
+Done: <one-line summary of the code change>.
+Changed: `path/to/file.tsx` (<what>); `.cursor/rules/<file>.mdc` (<rule topic>, if applicable).
 ```
 
 Name the commit subject in the reply when it helps the reviewer find the push.
@@ -156,6 +182,8 @@ Context for this stack, up to #<this pull request number>:
 ## 11. Hand over to reflect-review
 
 After step 10, or as soon as the user skips or postpones the replies or the context comment, use `AskQuestion` to ask whether to run `/reflect-review` now. Do not end the round without asking. Running it turns repeated reviewer patterns into guards in the repo's Cursor rules. If the user says yes, read `../reflect-review/SKILL.md` and follow it with the comments from this run.
+
+When a review thread explicitly asks to “put in rules”, prefer running reflect-review **before** step 9.8 drafts thread replies, so replies can cite the new guard. If replies went out first, use a follow-up reply on that thread after the rule commit.
 
 ## Do not
 
