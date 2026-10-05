@@ -11,13 +11,19 @@ Report first. Edit files only for comments the user selects in step 8. After the
 
 When the user asks to go through the whole lot of threads at once (every open review, a stack of pull requests, or the rest of the threads), switch to Plan mode before any edit, commit, or push. Call SwitchMode with target `plan`. If you are already in Plan mode, stay there.
 
-Do not leave Plan mode to implement until the user accepts the current thread. Commit and push still wait until they say they are happy with that diff.
+Keep three threads in the current set, ordered easiest to hardest. The rest stay as a backlog in that same order. Show each current thread in the step 7 format, with its GitHub link. List every backlog thread as a bullet: link, a concise version of the comment, then the login of who left the thread.
 
-In that plan:
+Do not leave Plan mode to implement until the user accepts the current set. Commit and push still wait until they say they are happy with that diff. Work on the current three together only when they touch different files. If two share a file, do the easier one first.
 
-- Show only the current thread, in the step 7 format, and include its GitHub link.
-- Put each review the user has already agreed into the plan todos. Mark it completed only after it is pushed. Leave it pending when the change is still local, so a change they have not reviewed cannot be skipped.
-- List every later thread, from the next one through the last, as a bullet: link, a concise version of the comment, then the login of who left the thread.
+As soon as the user is happy with a thread, update the plan before any commit, push, or reply:
+
+- Take that thread out of the current set.
+- Pull the next backlog thread that does not share a file with one still in the current set, so the set is three again (or whatever remains).
+- Show the updated current set, so the user can start the next thread immediately.
+
+Then commit, push, and reply for the thread just finished. In Multitask Mode, run that commit, push, and reply in the background (`run_in_background: true`) and continue with the next current thread in this chat. Do not wait for the push or the reply before showing the next threads.
+
+Move a thread out of the current set only after the user has said they are happy with its diff. Once they have, the queue moves even while the push and reply are still running.
 
 ## 1. Resolve repo and branch
 
@@ -84,10 +90,12 @@ When design or styling is in question and the user has not approved a change, pr
 
 ## 7. Output format
 
-One block per comment, separated by `---`. Number comments sequentially.
+One block per comment, separated by `---`. Number comments sequentially. Every block includes the GitHub discussion link for that thread, so the reader can open the comment.
 
 ```markdown
 ### 1. `path/to/file.tsx:42` — @reviewer
+[Thread](https://github.com/owner/repo/pull/1#discussion_r123)
+
 > quoted comment (trimmed; preserve meaning)
 
 **What it does (99% confident):** Plain-English link between the reviewer's point and the current code. Replace `99%` with how sure you are of that reading.
@@ -121,7 +129,7 @@ Only after the user selects comments in step 8:
 2. Run the repo's checks that apply to the touched files, and report any failures. Do not commit a repo whose checks failed.
 3. Summarise what changed, in a short list. Use `AskQuestion` to ask whether the user is happy with the changes. Options: happy, commit and push; not happy, they will say what to change. **Stop here.** Do not commit, push, draft, or post until they say they are happy.
 4. If they are not happy, change the code they name and return to step 3.
-5. Once they are happy, commit and push before any GitHub reply:
+5. Once they are happy, commit and push before any GitHub reply. On a whole-queue round, follow **Whole queue** first: update and show the current set, then commit, push, and reply (in the background when Multitask Mode is on):
    - One commit per repo this round changed. Stage only the files from this round. Do not stage secrets (`.env`, credentials).
    - Read `git log -5 --format=%s` in that repo and match that subject style. Pass the message with a HEREDOC. Do not use `--no-verify` or `--no-gpg-sign`.
    - If the branch is `main` or `master`, stop and ask before committing.
