@@ -68,7 +68,9 @@ Path: [`blueprints/add-publisher-panel/`](blueprints/add-publisher-panel/). Star
 
 Path: [`rules/core-web-vitals-excellence/`](rules/core-web-vitals-excellence/). Compose: `node rules/core-web-vitals-excellence/scripts/compose-cursorrules.mjs <nextjs|lovable> <repo-path>`.
 
-**Documentation** (`documentation/`): `/document-current-state`, `/document-database`, `/document-flow`, `/generate-changelog`, `/refine-rules`, `/generate-handoff-doc` — invoke separately when needed.
+**Documentation** (`documentation/`): `/document-current-state`, `/document-database`, `/document-flow`, `/generate-changelog`, `/generate-overview`, `/prepare-review`, `/refine-rules`, `/generate-handoff-doc` — invoke separately when needed.
+
+`/prepare-review` — before handing a branch over: diff vs `origin/main`, flag breaking changes and migrations, fill the MR/PR overview (summary, features, test, deploy, revert).
 
 **Other**: `/generate-changelog` for deploy notes.
 
