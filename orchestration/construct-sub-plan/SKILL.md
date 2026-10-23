@@ -13,14 +13,17 @@ agents:
 
 **Artefact path:** `docs/feature/<feature>/sub-plans/{step}-{task}-sub-plan.md`
 
-**Input:** one unchecked row from master Sub-Plan Orchestration — read `feature`, `step`, `task` slugs from row.
+**Input:** one unchecked row from master Deliverable Phases — read `feature`, `step`, `task` slugs from row.
+
+**Gate check:** read the master Approvals table first. If `matrix-flow` or `ambiguity-echo` is not `acknowledged`, stop and name the open gate. Do not write the sub-plan.
 
 ---
 
 ## Phases
 
 ### 1. Scope lock
-- this sub only — cite master Context + Impact
+- this sub only — cite master Context + Impact + the phase id and matrix row ids this sub implements
+- do not copy the input/output matrix into this file
 - explicit out-of-scope for this sub
 
 ### 2. Repo drill
@@ -78,6 +81,8 @@ Write file `sub-plans/{step}-{task}-sub-plan.md`:
 | feature | {feature} |
 | step | {step} |
 | task | {task} |
+| phase | Phase {nn} |
+| matrix_rows | P01-01, ... |
 | master | {feature}-master-plan.md |
 | test_plan | test-plans/{step}-{task}-test-plan.md |
 

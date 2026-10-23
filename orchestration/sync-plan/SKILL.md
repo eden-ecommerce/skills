@@ -29,7 +29,7 @@ agents:
 
 ### 3. Sync master
 - rewrite master sections to reflect **actual** impl
-- check off completed sub row in Sub-Plan Orchestration
+- check off completed sub row in Deliverable Phases
 - move completed `sub-plans/{step}-{task}-sub-plan.md` → `sub-plans/completed/{step}-{task}-sub-plan.md` (create `sub-plans/completed/` if missing)
 
 ### 4. Sync test-plan
@@ -42,6 +42,7 @@ agents:
 
 - more unchecked subs → `/construct-sub-plan` for next row
 - all subs done → `/merge-plan`
+- do not write `{feature}-delivered-feature-plan.md` here. `/merge-plan` writes it after the user acknowledges ready for deployment
 
 ---
 

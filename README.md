@@ -29,19 +29,20 @@ Master/sub plan workflow. Artefact root: `docs/feature/<feature>/`.
 ```
 docs/feature/{feature}/
   {feature}-master-plan.md
+  {feature}-delivered-feature-plan.md
   sub-plans/{step}-{task}-sub-plan.md
   test-plans/{step}-{task}-test-plan.md
 ```
 
 | Invoke | When | Output |
 |--------|------|--------|
-| `/construct-master-plan` | Task brief received | `{feature}-master-plan.md` |
-| `/construct-sub-plan` | Expand one prioritized sub | `sub-plans/{step}-{task}-sub-plan.md` |
+| `/construct-master-plan` | Task brief, next sub, or "sub complete" | `{feature}-master-plan.md`, then the delivered file at the end |
+| `/construct-sub-plan` | Expand one prioritized sub, after both master gates are acknowledged | `sub-plans/{step}-{task}-sub-plan.md` |
 | `/construct-test-plan` | Before Build — TDD specs + manual checklist (per sub) | `test-plans/{step}-{task}-test-plan.md` |
-| `/handoff-plan` | Thread switch, unknowns | copy-paste HANDOFF block |
+| `/handoff-plan` | Thread switch, open gate, unknowns | copy-paste HANDOFF block |
 | `/review-implementation` | After Build | audit report (`/ponytail-review`) |
 | `/sync-plan` | Sub complete | updated master + sync log (`/ponytail-audit`) |
-| `/merge-plan` | All subs done | MR description |
+| `/merge-plan` | Optional split of the ready-for-deployment step | `{feature}-delivered-feature-plan.md` + MR description |
 | `/vertically-slice-changes` | A change is too large for one review | Stacked pull requests, each with its own test and deploy steps |
 
 Path: [`orchestration/vertically-slice-changes/`](orchestration/vertically-slice-changes/). This skill does not start with `/caveman ultra`. The others do. Build uses `/ponytail` (per sub-plan Build block).
@@ -82,13 +83,13 @@ Path: [`rules/core-web-vitals-excellence/`](rules/core-web-vitals-excellence/). 
 | 2 | **ChatGPT** | [task-refinement-prompt.md](docs/task-refinement-prompt.md) — `TASK_TITLE`, `REPORTED_BY`, `TASK_DESCRIPTION` |
 | 3 | **Slack List Thread** | Clarifications → **written sign-off** |
 | 4 | **Cursor Plan** | `/caveman ultra` → `/construct-master-plan` |
-| 5 | **Cursor Plan** | `/construct-sub-plan` per prioritized sub |
-| 6 | **Cursor Plan** | `/construct-test-plan` per sub |
-| 7 | **Human** | Read + amend plans in `docs/feature/<feature>/` |
-| 8 | **Cursor Build** | Agent + `/ponytail` from sub-plan Build block |
-| 9 | **Cursor Agent** | `/review-implementation` → `/sync-plan` |
-| 10 | **Human** | Tick manual test-plan rows; Gates green |
-| 11 | **Cursor** | `/merge-plan` when all subs synced |
+| 5 | **Human** | Approve matrix and flows; answer ambiguities; confirm the agent's restatement |
+| 6 | **Same skill** | Walks the next unchecked sub and stops |
+| 7 | **Cursor Build** | Build that sub only |
+| 8 | **Human** | Says the sub is complete; confirms the agent's restatement of the diff |
+| 9 | **Same skill** | Writes As built, matrix status, and a Sync Log row, then walks the next sub |
+| 10 | **Human** | When every sub is checked: Gates green, acknowledge ready for deployment |
+| 11 | **Same skill** | Writes the delivered feature plan, then the MR |
 | 12 | **Slack + Deploy** | Peer review, staging, production (`deploy`) |
 
 See [cursor-plan-mode.md](docs/cursor-plan-mode.md) and [software-development-lifecycle.md](docs/software-development-lifecycle.md) for detail.

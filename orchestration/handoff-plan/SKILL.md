@@ -19,11 +19,12 @@ agents:
 
 1. **Slugs** — feature, step, task from master header + active sub row
 2. **Master status** — `{feature}-master-plan.md` done vs pending subs
-3. **Active sub** — `sub-plans/{step}-{task}-sub-plan.md` path + Goal one-liner
-4. **Test-plan** — `test-plans/{step}-{task}-test-plan.md` approved? manual ticks open?
-5. **Architecture** — file paths, DB tables, API routes from plans (no secrets)
-6. **Last gates** — pass/fail + command output summary if failed
-7. **Next action** — exact step: skill invoke, amend file, or Build
+3. **Approvals** — `matrix-flow` and `ambiguity-echo` status from the master Approvals table
+4. **Active sub** — `sub-plans/{step}-{task}-sub-plan.md` path + Goal one-liner
+5. **Test-plan** — `test-plans/{step}-{task}-test-plan.md` approved? manual ticks open?
+6. **Architecture** — file paths, DB tables, API routes from plans (no secrets)
+7. **Last gates** — pass/fail + command output summary if failed
+8. **Next action** — if either approval is not `acknowledged`, the next action is to answer that gate. Else: skill invoke, amend file, or Build
 
 ---
 
@@ -43,6 +44,10 @@ Single copy-paste block only:
 - done: [x] ...
 - pending: [ ] ...
 
+### Approvals
+- matrix-flow: pending | acknowledged
+- ambiguity-echo: pending | acknowledged
+
 ### Active Sub (sub-plans/{step}-{task}-sub-plan.md)
 - goal: ...
 - blocking: none | ...
@@ -59,5 +64,5 @@ Single copy-paste block only:
 - last run: pass/fail — ...
 
 ### NEXT (run this first)
-→ {exact command: e.g. /construct-sub-plan for {step}-{task} | amend {file} | Build from sub-plans/{step}-{task}-sub-plan.md}
+→ {answer gate matrix-flow | answer gate ambiguity-echo | /construct-sub-plan for {step}-{task} | amend {file} | Build from sub-plans/{step}-{task}-sub-plan.md}
 ```
