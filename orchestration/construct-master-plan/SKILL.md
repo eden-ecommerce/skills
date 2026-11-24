@@ -1,6 +1,6 @@
 ---
 name: construct-master-plan
-description: "SDLC plan step. Research, explain the current state with a flow and a matrix, settle every open choice, then write one master plan. Use when starting a feature from a brief. Planning only. No code."
+description: "SDLC plan step. Research, explain the current state with a flow and a matrix, settle every open choice, then write one master plan. When the brief changes an API, name that target's regenerate scripts. Use when starting a feature from a brief. Planning only. No code."
 agents:
   - cursor
 ---
@@ -50,8 +50,9 @@ Dispatch the subagents in parallel. Each subagent returns facts, not a plan:
 - whether these exist: `.cursorrules`, `AGENTS.md`, `.cursor/STRUCTURE.md`, `.cursor/CONTEXT.md`
 - every file in `.cursor/rules/`: path, `alwaysApply`, `globs`
 - merge request template path: `.gitlab/merge_request_templates/default.md`, else `.github/pull_request_template.md`, else `default`
-- gate commands named in `.cursorrules`, `AGENTS.md`, or `.cursor/STRUCTURE.md`
+- gate commands named in `.cursorrules`, `AGENTS.md`, or `.cursor/STRUCTURE.md`. A JavaScript repo uses pnpm. Record `pnpm` commands. Do not record `npm` or `yarn`.
 - blast radius for the brief keywords: shared modules, tables, routes, env var names, flags. Open the files. Do not guess paths.
+- when the brief changes an API, a schema, or a generated client: that repo's regenerate commands. Open the script. Do not guess the command.
 
 Write the **Repos** table from those reports.
 
@@ -94,6 +95,14 @@ Create `references/` and `merge-requests/` if missing. Write `{feature}-master-p
 - When a later repo cannot be safe until an earlier repo is deployed, the earlier sub stays deployable through a flag, a dormant route, or an additive change. Say which, on that sub.
 - Order is the deploy order.
 - Scope is the **Objectives** and the matrix rows. A behaviour in neither is out. Do not add one.
+
+**API regenerate.** When a sub changes an API, a schema, or a generated client, that sub names the target project's regenerate commands, in order, and lists the generated files in **Files**. Find the commands in that repo during recon. Do not copy another project's script. When recon cannot find a script, add an ambiguity row. Do not invent the command.
+
+c360 runs in this order. The hub step needs the environment steps already done:
+
+1. In the environment directory: `./run.sh generate typescript` for the data client.
+2. In the environment directory: `./run.sh push database schema`.
+3. In hub: `./run.sh open api regenerate`.
 
 **Edge case matrix.** One row per case. Columns: number, scenario, layer, expected, outcome. Cover empty input, length boundaries, auth failure, wrong owner, illegal state, race, double submit, injection, timeout, and partial failure. An unbounded set is an ambiguity row, not a summary. Each row is also a test under that sub.
 
@@ -192,6 +201,7 @@ flowchart TD
 
 ### Deploy
 
+Generate: {commands in order, or none}.
 Steps from the file checks for this repo. A PHP production push is a person's step.
 
 ## Edge Cases

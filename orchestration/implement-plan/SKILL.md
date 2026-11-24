@@ -36,9 +36,9 @@ Do not paste the other subs.
 
 The subagent:
 
-1. Implements the Files table. A companion edit (change log, generated client) needs a named repo rule.
+1. Implements the Files table. A companion edit (change log, generated client) needs a named repo rule. When **Deploy** names regenerate commands, run them in that order after the API change and commit the generated files. A missing command stops this sub.
 2. Writes the automated tests in the Tests table, then the code that makes them pass.
-3. Runs the gate commands from the repo row. A failing gate stops this sub. Paste the failure. Do not start the next sub.
+3. Runs the gate commands from the repo row. A JavaScript repo uses pnpm for install and scripts. Do not run npm or yarn. A failing gate stops this sub. Paste the failure. Do not start the next sub.
 4. Follows [review-implementation](../review-implementation/SKILL.md) on this sub's diff. Applies the required refactors that stay inside the section. Re-runs the gates.
 
 The parent appends **Sync Log**: step, gates, review. It does not widen the plan.

@@ -113,6 +113,12 @@ End-to-end implementation playbooks. Invoke directly. No master plan required.
 | `/optimise-bundles` | Route JS budget / `firstLoadUncompressedJsBytes` CI failure |
 | `/optimise-core-web-vitals` | CLS, LCP, INP, FCP, TTFB, TBT, layout shift, render-blocking, GTmetrix/Lighthouse/CrUX |
 
+## Maintenance
+
+| Invoke | When |
+|--------|------|
+| `/update-packages` | Weekly Dependabot, pnpm, or Composer updates. Path: [`maintenance/update-packages/`](maintenance/update-packages/). |
+
 ## Documentation
 
 Invoke on their own: `/document-current-state`, `/document-database`, `/document-flow`, `/generate-changelog`, `/generate-overview`, `/generate-handoff-doc`, `/refine-rules`, `/review-checklist`.
