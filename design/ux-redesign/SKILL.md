@@ -7,7 +7,9 @@ agents:
 
 # Redesign a page
 
-Propose first. Don't build the real change until the user accepts the proposal. Use Plan mode if it is available. A throwaway prototype to settle a visual question is fine if the user agrees (see "ASCII art").
+- Propose first. Don't build the real change until the user accepts the proposal. Use Plan mode if it is available.
+- Start incremental unless the developer asks for something more radical.
+- Never invent or guess a reference.
 
 ## Scale the response to the change
 
@@ -37,32 +39,18 @@ Start incremental. Go radical only when the developer hints at it ("start again"
 | Output     | A ranked list of changes, each shippable on its own | A new design, and why small changes won't get there                          |
 | Main risk  | Patching over a structural problem                  | Upsetting current users who know the old page                                |
 
-**Incremental**
-
-- Keep what people already know where it is: navigation, labels, and where the primary actions sit.
-- Fix the problems with the most impact first. Rank changes by impact against effort.
-- Make each change work on its own, so it can ship and be judged separately.
-- If the changes keep pointing at the same structural problem, say so and propose moving to radical.
-
-**Radical**
-
-- Give the evidence for why incremental changes won't get there.
-- Name the organising idea in a sentence or two, for example "separate checking the defaults from looking after the list".
-- Plan the transition for current users: warn them beforehand, explain what changed and why, and give them a way to send feedback. Compare satisfaction before and after where you can measure it.
-- For the most radical changes, consider whether you could let people switch back to the old design for a while. It often isn't practical, so only propose it when the change is large and the audience needs it. Say why it's worth the cost in this case, and treat it as a decision for this task.
-- Where possible, propose a staged route: what could ship first without breaking what people know.
-
-Why: gentle, evolving change usually serves existing users better. A radical redesign pays off mainly when there are few current users or the design has lost its coherence ([NN/g](https://www.nngroup.com/articles/fresh-vs-familiar-aggressive-redesign/)). Experienced users react badly to sudden interface changes. Warning them, explaining the change and listening to their feedback all reduce that ([Sedley, GV Library](https://library.gv.com/change-aversion-why-users-hate-what-you-launched-and-what-to-do-about-it-2fb94ce65766)).
+**Incremental?** Read [references/incremental.md](references/incremental.md).
+**Radical?** Read [references/radical.md](references/radical.md).
 
 ## Workflow
 
 ```
 - [ ] 1. Understand what the page does today
-- [ ] 2. Choose the approach (incremental or radical)
+- [ ] 2. Choose the approach, and read its reference file
 - [ ] 3. Read the project's rules and domain language
 - [ ] 4. Research
 - [ ] 5. Design around the jobs people come to do
-- [ ] 6. Write the plan (template below)
+- [ ] 6. Write the plan
 - [ ] 7. Ask questions, then revise
 ```
 
@@ -76,7 +64,7 @@ Why: gentle, evolving change usually serves existing users better. A radical red
 
 ### 2. Choose the approach
 
-Follow "Choose the approach: incremental or radical" above. State the choice and the reason at the top of the plan.
+Follow "Choose the approach" above, and read only the reference file for the approach you chose. State the choice and the reason at the top of the plan.
 
 ### 3. Read the project's rules and domain language
 
@@ -104,11 +92,9 @@ If the project has no rules on a topic, say so, and base the decision on the res
 - Cite only sources you opened in this session. State the specific finding, not just the topic.
 - Say how close the source is to this case: its audience, its type of product and its method. Don't stretch a finding beyond what it tested.
 - If you find no specific research, say so rather than citing something loosely related.
-- Record every source you use as a reference (format below).
 
 ### 5. Design around the jobs people come to do
 
-- Follow the approach chosen in step 2.
 - Put the most common job first. Give each area one clear primary action.
 - Keep it calm: no alarm words or red for normal states, and no repeating the same fact in a summary, a tab and a badge (unless the research calls for it).
 - On overview pages, put related cards side by side and use the width on wide screens. Keep forms and running text to a readable width, about 75 characters a line, and start from a single column on small screens ([GOV.UK Design System](https://design-system.service.gov.uk/styles/layout/)).
@@ -120,7 +106,10 @@ If the project has no rules on a topic, say so, and base the decision on the res
 
 ### 6. Write the plan
 
-Use the template below, at the size chosen above. Draw every screen and state that changes in ASCII. Follow each drawing with short bullets that explain the decisions. Use mermaid only for component structure and data flow, never in place of a mock-up.
+**Small change?** Answer in chat as described under "Scale the response". No template.
+**Medium or large change?** Read [references/plan-template.md](references/plan-template.md) and use it.
+
+Draw every screen and state that changes in ASCII. Follow each drawing with short bullets that explain the decisions. Use mermaid only for component structure and data flow, never in place of a mock-up.
 
 ### 7. Ask questions, then revise
 
@@ -128,114 +117,6 @@ Use the template below, at the size chosen above. Draw every screen and state th
 - When the user asks "should we do X?", give the pros and cons, cite research, and end with a clear recommendation.
 - Push back, with reasons, when you think the current design or the user's idea is worse.
 - When the user asks for a change, update the plan and its ASCII art. Don't just reply in chat.
-
-## Plan template
-
-````markdown
-# {Page}: review and redesign
-
-## 1. Review of the current page
-
-For a new page, review what exists around it instead: the pages it links to and
-from, what it replaces, and the precedent it should follow.
-
-Link to the page file. Group the findings, each one a bold lead and a sentence:
-
-### Evidence
-
-What data exists and what it shows, or that there is none.
-
-### Bugs you can see on the page
-
-### Copy and naming (against the project's rules)
-
-### UI best practice
-
-### Accessibility
-
-### Form best practice (if there is a form)
-
-### Architecture and deprecated code
-
-## 2. Proposed design
-
-**Approach:** incremental or radical, and why.
-
-### Incremental: changes, ranked by impact
-
-Each change with before and after ASCII, and why it ranks where it does.
-
-### Radical: the organising idea, in a sentence or two
-
-### Desktop: `/{route}`
-
-One sentence describing the layout, for anyone who can't see the drawing.
-
-```text
-+--------------------------------------------------------------------------+
-| Page title                                           [ Primary action ]  |
-| Subtitle giving context                                                  |
-+--------------------------------------------------------------------------+
-  +----------------------------------+  +----------------------------------+
-  | [icon] Card title     [ Action ] |  | [icon] Card title     [ Action ] |
-  | ...                              |  | ...                              |
-  +----------------------------------+  +----------------------------------+
-```
-
-- Why each area is where it is, and what each action does.
-
-### Mobile (one column)
-
-### Dialogs and sub-pages
-
-### Other states (loading, empty, error, no permission)
-
-### Transition for current users (radical only)
-
-How current users will be warned, told what changed and why, and heard. If
-switching back to the old design is worth offering, say why it's practical and
-needed here. Otherwise leave it out.
-
-## 3. Options considered (if there was a real choice)
-
-| Option | Pros | Cons |
-Then: **Recommendation:** … because … (cite references).
-
-## 4. Structure and data
-
-Mermaid component tree and data flow. Name the hooks, services and endpoints,
-and confirm each one is permitted for this page.
-
-## 5. Files
-
-New, changed and deleted files, routes, navigation entries, and any URL schema
-or routing docs to update.
-
-## 6. Copy
-
-Keys grouped by concept, not by page. Reuse existing keys first. Follow the
-project's copy, tone and spelling rules. If the project is translated, add keys
-to every locale, then stop and ask the user to run any type or key generation
-step before linting.
-
-## 7. Decisions to confirm
-
-## 8. How we'll know it worked
-
-The measures of success, and a short plan for testing with users: who to test
-with, the tasks to give them, and the questions the test should answer.
-
-## 9. Verification
-
-The project's own typecheck, lint and test commands (from its rules, README or
-package scripts), plus the screens to check by hand: mobile, wide, 400% zoom,
-200% text resize, increased text spacing, keyboard only, a screen reader, and
-long content.
-
-## References
-
-- [Title](url) (Publisher): the finding that shaped this design, in one sentence.
-````
 
 ## ASCII art
 
@@ -249,7 +130,7 @@ long content.
 ## References
 
 - Prefer a reference for each design claim that rests on research: a link, the publisher and the finding in one sentence. For small changes this is a recommendation, not a requirement.
-- Never invent or guess a reference. A claim without one is better than a wrong one.
+- A claim without a reference is better than a wrong one.
 - Cite the project's rule files as links (for example `[copy.mdc](.cursor/rules/copy.mdc)`) when a finding comes from them.
 - If the research produces guidance that will outlast this page, propose a new or updated rule in the project's rules location (`.cursor/rules/`, `AGENTS.md` or `CLAUDE.md`) with a `## References` section in the same format.
 
