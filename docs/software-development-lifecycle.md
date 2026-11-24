@@ -39,9 +39,9 @@ Cursor loads `alwaysApply` rules for the files you have open. It does not load t
 
 ## Human gates
 
-The briefing in step 1. Manual test rows that automation cannot run. A person lands code on `main` and `master`. PHP production push, `worker-deploy`, and `terraform apply` stay with a person.
+The briefing in step 1. Manual test rows that automation cannot run. A person merges the feature branch into `main` or `master`. PHP production push, `worker-deploy`, and `terraform apply` stay with a person.
 
-The agent does not push `main` or `master` and does not merge the request. Commit one line: `type(entity): outcome`. No co-author trailer.
+The agent fetches the latest base and creates a feature branch before it edits a plan or a sub. It does not commit or push while on `main` or `master`, and it does not merge the request. Commit one line: `type(entity): outcome`. No co-author trailer.
 
 ## Building blocks
 

@@ -30,9 +30,11 @@ Before modifying any code, present a **Vertical Slice Plan** conforming to these
 
 Read the host from `git remote get-url origin`. A `github.com` URL uses the GitHub path. A GitLab URL uses the GitLab path. If the host is unclear, ask before creating branches.
 
-The base branch is `main`. A PHP repo (`composer.json` present and `vercel.json` absent) uses `develop`. Do not open a slice against `master`. Do not merge into `develop` or `master`. Do not push `develop`, `master`, or the `production` remote. A person does that after review. See [references/pull_request_template.md](references/pull_request_template.md).
+The base branch is `main`. A PHP repo (`composer.json` present and `vercel.json` absent) uses `develop`. Do not open a slice against `master`.
 
-**Push gate.** Before every `git push`, read `git branch --show-current`. Stop when the branch is `main` or `master`, or when the refspec is `main`, `master`, `HEAD:main`, or `HEAD:master`. A feature branch push is allowed. Do not `gh pr merge` or `glab mr merge`. A person lands the slice on the base branch.
+**Branch.** `git fetch origin` first. Read `git branch --show-current`. When it is `main` or `master`, stop. Do not commit and do not push. Create the slice branch from the latest `origin/main`, or `origin/master` when `main` does not exist. A PHP repo uses `origin/develop`. The next slice branches off the previous slice, not off `main`. A person merges each request into `main`, `master`, or `develop`.
+
+**Push gate.** Push only the slice branch: `git push -u origin HEAD`. Stop when the branch or the refspec is `main`, `master`, `HEAD:main`, or `HEAD:master`. Do not `gh pr merge` or `glab mr merge`. Do not push `develop` or the `production` remote. See [references/pull_request_template.md](references/pull_request_template.md).
 
 **Commit.** One line: `type(entity): outcome`. Type is `fix`, `chore`, `doc`, or `feature`. Entity is the table or the domain. Outcome is the task result, caveman. Author stays the existing git identity. No `--author`, no `--trailer`, no `Co-authored-by`, no `Signed-off-by`, no provider name. Do not change git config. Do not commit on `main` or `master`.
 

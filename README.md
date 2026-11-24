@@ -53,6 +53,8 @@ It then writes `{feature}-master-plan.md` and sets `ready`. Click Build. Do not 
 
 Click Build. `/implement-plan` reads that file and builds each `## Sub` in order. A subagent sees only its own section.
 
+The work is not done on `main` or `master`. The agent fetches the latest base and creates `feature/<feature>/<step>-<repo>-<task>` from `origin/main`, from `origin/master` when `main` does not exist, or from the feature branch already in use. A PHP repo starts from `origin/develop`. It pushes that branch and opens the pull request or merge request. You merge it into `main` or `master`.
+
 Build stops when a gate fails or a fact is missing from the plan. It does not invent the missing behaviour.
 
 When the gates pass, run the manual rows in each sub's Tests table. A failed row is fixed as that row only. Then go to deploy.
@@ -73,7 +75,9 @@ You land `main` and `master`. The agent does not push those branches and does no
 
 ## Git guards
 
-Hard human gate. A person lands code on `main` and `master`. The agent stops when the current branch, or the push refspec, is `main` or `master`. It does not merge the pull request or merge request.
+Hard human gate. A person merges into `main` and `master`.
+
+Before a master plan or a sub is edited, the agent fetches the latest base. When the current branch is `main` or `master`, it stops. It creates `feature/<feature>` or `feature/<feature>/<step>-<repo>-<task>` from `origin/main`, from `origin/master` when `main` does not exist, from `origin/develop` on a PHP repo, or from the feature branch already in use. It pushes only that branch and opens the pull request or merge request. It does not merge the request.
 
 Commit one line, caveman: `type(entity): outcome`. Type is `fix`, `chore`, `doc`, or `feature`. Entity is the table or the domain. Outcome is the task result. Author stays the existing git identity. No `Co-authored-by`, no `Signed-off-by`, no provider trailer.
 

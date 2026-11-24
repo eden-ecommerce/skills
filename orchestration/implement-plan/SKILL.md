@@ -13,7 +13,9 @@ agents:
 
 **Bind:** before a subagent edits a repo, it reads the rules on that sub's **Repos** row. Those files win over this skill.
 
-**Git.** Hard human gate. A person lands code on `main` and `master`. The subagent does not commit or push while `git branch --show-current` is `main` or `master`. It does not push those refspecs. It does not `gh pr merge` or `glab mr merge`.
+**Git.** Hard human gate. A person merges into `main` and `master`.
+
+Before the first edit in a repo, `git fetch origin` and read `git branch --show-current`. When the branch is `main` or `master`, stop. Do not edit, commit, or push. Create `feature/<feature>/<step>-<repo>-<task>` from `origin/main`, or `origin/master` when `main` does not exist. A PHP repo uses `origin/develop`. When this sub continues an existing feature branch, branch off that feature branch. `git checkout -b <name> <base>`. Push only that branch with `git push -u origin HEAD`. Open the pull request or merge request. Do not `gh pr merge` or `glab mr merge`. Do not push a refspec of `main` or `master`.
 
 Commit one line: `type(entity): outcome`. Type is `fix`, `chore`, `doc`, or `feature`. Entity is the table or the domain. Outcome is the task result, caveman. Author stays the existing git identity. No `--author`, no `--trailer`, no `Co-authored-by`, no `Signed-off-by`, no provider name. Do not change git config.
 

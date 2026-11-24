@@ -30,6 +30,8 @@ docs/feature/{feature}/
 
 A missing `.cursor/STRUCTURE.md` does not stop the run.
 
+**Branch.** Before the first write in a repo, `git fetch origin` and read `git branch --show-current`. When the branch is `main` or `master`, stop. Do not write the plan on that branch. Create `feature/<feature>` from `origin/main`, or from `origin/master` when `main` does not exist. A PHP repo uses `origin/develop`. When the user is already on a feature branch, branch off that branch. Push only the new branch. A person merges the request into `main` or `master`.
+
 ---
 
 ## Flow

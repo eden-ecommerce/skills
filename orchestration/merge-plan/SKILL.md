@@ -72,4 +72,4 @@ Count changed lines per sub (`git diff --numstat` on that sub's files). A sub ov
 
 ### 5. Stop
 
-Do not push and do not open the merge request unless the user asks. A person lands code on `main` and `master`. Never push those branches, never push those refspecs, and never `gh pr merge` or `glab mr merge`. Return the path of each body.
+Do not push and do not open the merge request unless the user asks. Before either, read `git branch --show-current`. When it is `main` or `master`, stop. The source branch is `feature/<feature>/...`, created from the latest `origin/main`, `origin/master`, or the current feature branch. A person merges that request into `main` or `master`. Never push those branches, never push those refspecs, and never `gh pr merge` or `glab mr merge`. Return the path of each body.
