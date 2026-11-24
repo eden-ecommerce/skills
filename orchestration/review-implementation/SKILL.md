@@ -1,84 +1,61 @@
 ---
 name: review-implementation
-description: "SDLC post-Build QA gate; /ponytail-review on diff + plan scope check + Gates + AGENTS standards; audit report before sync. Use after Cursor Build, before /sync-plan."
+description: "Post-build review of one sub-plan diff. Scope, repo rules, gates, secrets, and a ponytail review. Use from implement-plan after a sub builds, or on its own before merge-plan."
 agents:
   - cursor
 ---
 
-/caveman ultra
+**No auto-fix** unless the caller is implement-plan or the user asks for the refactors.
 
-**Bind:** `.cursor/STRUCTURE.md` + `.cursor/CONTEXT.md` + `docs/AGENTS.md` (repo copy if present).
+**Input:** that sub's `## Sub` section and `git diff` for the files in its Files table. Creep is any file not in that table and not required by a named repo rule.
 
-**SDLC:** Post-Build quality gate — pre-sync. **No auto-fix** unless user asks.
-
-**Input:** git diff + `{feature}-master-plan.md` + active `sub-plans/{step}-{task}-sub-plan.md`.
+**Bind:** read the rules list on the sub-plan Repo row before judging the diff. Gates come from that row. Do not assume `pnpm lint`.
 
 ---
 
-## Phases
+## Checks
 
-### 1. /ponytail-review
-- apply `/ponytail-review` on current diff
-- one line per finding: `L<n>: <tag> <what>. <replacement>.`
-- tags: delete, stdlib, native, yagni, shrink
-- end: `net: -<N> lines possible.` or `Lean already. Ship.`
-
-### 2. Scope check
-- diff vs master + sub-plan — flag scope creep, unrelated files
-- every changed file traceable to sub-plan Files table?
-
-### 3. Gates + security
-- run STRUCTURE **Gates** (`pnpm lint`, `pnpm ts-check`, etc.) — must pass
-- scan diff for hardcoded secrets, tokens, credentials
-
-### 4. AGENTS standards
-- GB English spelling (`colour`, `organise`, `behaviour`)
-- naming: descriptive, concise (`getUserServer` not `getUsrSrv`)
-- KISS, DRY — no new abstractions without need
-
-### 5. Atomic components (UI changes)
-- 1 file = 1 responsibility
-- guard clauses: early return for loading/error before main return
-- reject: components inside render methods; nested ternaries in final return
-- fix path: extract conditional UI to own component file
+1. **Ponytail.** Follow `/ponytail-review` on this diff. One line per finding: `L<n>: <tag> <what>. <replacement>.` Tags: delete, stdlib, native, yagni, shrink. End with `net: -<N> lines possible.` or `Lean already. Ship.`
+2. **Scope.** Every changed file is in the Files table, or required by a named repo rule. Name any other file as creep.
+3. **Rules.** Check the diff against each file in the rules list. One line per break: rule file, the break, the fix.
+4. **Gates.** Run the repo gate commands. Record pass or fail with the command.
+5. **Secrets.** Scan the diff for tokens, passwords, and credential literals.
+6. **Tests.** Automated rows in the test plan exist. Manual rows stay unticked.
 
 ---
 
-## Stop gates
-
-- Gates fail → list fixes; no `/sync-plan` until green
-- ponytail-review findings with severity → refactor list
-
----
-
-## Next
-
-`/sync-plan` when audit passes.
-
----
-
-## Output template
+## Output
 
 ```md
-# Review — {step}-{task}
+# Review — {step}-{repo}-{task}
 
 ## Ponytail Review
-<!-- one-line findings -->
 
 ## Scope
-- [ ] matches sub-plan
-- creep: ...
+
+- [ ] matches the sub-plan
+- creep:
+
+## Rules
+
+| rule | break | fix |
+|------|-------|-----|
 
 ## Gates
-- lint: pass/fail
-- ts-check: pass/fail
+
+| command | result |
+|---------|--------|
 
 ## Security
-- secrets: none found / FLAG: ...
 
-## Standards
-<!-- GB English, naming, atomic UI issues -->
+- secrets: none found
+
+## Tests
+
+- automated present:
+- manual still open:
 
 ## Required Refactors
-<!-- empty if ship-ready -->
 ```
+
+A failing gate or an open required refactor blocks the next sub. implement-plan applies the refactors. A standalone run lists them and stops.

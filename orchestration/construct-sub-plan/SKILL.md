@@ -1,120 +1,46 @@
 ---
 name: construct-sub-plan
-description: "SDLC subtask design; one master sub row → self-research repo → Build-ready scaffold + TDD outline; output sub-plans/{step}-{task}-sub-plan.md. Use when expanding prioritized sub from master plan."
+description: "Build-ready plan for one master-plan sub row. Use from construct-master-plan, or on its own for one sub. No code."
 agents:
   - cursor
 ---
 
-/caveman ultra
+**No code.** One sub becomes one `## Sub NN` section inside the master plan. When a person runs this skill alone, write that section into the master plan. Do not create `sub-plans/`.
 
-**Bind:** `.cursor/STRUCTURE.md` + `.cursor/CONTEXT.md`. Read `{feature}-master-plan.md` from artefact dir in master header.
+**Input:** `{feature}-master-plan.md` and one sub outcome. When a parent agent calls this skill, it passes that outcome and the matrix ids. Do not look up other subs except their `Needs` line.
 
-**SDLC:** Subtask refinement → **Build-ready plan**. **No code.**
+**Bind:** copy this sub's repo row from the master **Repos** table. Read `.cursorrules`, `AGENTS.md`, every `alwaysApply: true` rule, and every glob rule whose globs match the files you will list. Those rules decide paths, gates, and companion files (change log, generated client).
 
-**Artefact path:** `docs/feature/<feature>/sub-plans/{step}-{task}-sub-plan.md`
-
-**Input:** one unchecked row from master Deliverable Phases — read `feature`, `step`, `task` slugs from row.
-
-**Gate check:** read the master Approvals table first. If `matrix-flow` or `ambiguity-echo` is not `acknowledged`, stop and name the open gate. Do not write the sub-plan.
+**Path:** insert under `## Sub {step}` in `{feature}-master-plan.md`. Do not write a second file.
 
 ---
-
-## Phases
-
-### 1. Scope lock
-- this sub only — cite master Context + Impact + the phase id and matrix row ids this sub implements
-- do not copy the input/output matrix into this file
-- explicit out-of-scope for this sub
-
-### 2. Repo drill
-- read exact files to touch (open them)
-- note patterns from STRUCTURE — match neighbour style
-
-### 3. Step-by-step strategy
-- ordered impl steps — smallest diff posture
-- deps on other subs explicit
-
-### 4. Scaffold (Build-ready)
-- files add / change (paths)
-- public APIs, endpoints, exports
-- data shapes, types
-- extension points — no speculative layers
-
-### 5. TDD outline
-- test file paths
-- `describe` / `it` names + assertion intent
-- red-first — **no production code**, no impl bias
-
-### 6. Done criteria
-- STRUCTURE **Gates** (`pnpm lint`, `pnpm ts-check`, etc.)
-- manual smoke bullets
-
-### 7. Ambiguities
-- list now
-- blocking → stop; `/handoff-plan`
-
----
-
-## Stop gates
-
-- blocking ambiguity → stop before Build
-- human amend plan → Cursor Build
-
----
-
-## Next
-
-`/construct-test-plan` if `test-plans/{step}-{task}-test-plan.md` missing or stale.
-Else human amend → **Build**.
-
----
-
-## Output template
-
-Write file `sub-plans/{step}-{task}-sub-plan.md`:
-
-```md
-# {Subtask Title}
-
-| Slug | Value |
-|------|-------|
-| feature | {feature} |
-| step | {step} |
-| task | {task} |
-| phase | Phase {nn} |
-| matrix_rows | P01-01, ... |
-| master | {feature}-master-plan.md |
-| test_plan | test-plans/{step}-{task}-test-plan.md |
-
-## Goal
-<!-- one paragraph -->
 
 ## Steps
-1. ...
-2. ...
 
-## Files
+1. **Scope.** Cite the master Context, Impact, and the matrix ids this sub implements. State out of scope, including the other subs.
+2. **Repo.** Open every file this sub will change. Match the neighbouring style the rules name.
+3. **Steps.** Smallest diff. Name the sub steps this one `needs`, as already deployed.
+4. **Scaffold.** Files, public APIs, data shapes. No speculative layers.
+5. **Tests.** File paths and `describe` / `it` intent. The test plan holds the full cases.
+6. **Deploy.** How this step deploys on its own, and how to revert it without reverting later steps. Use the repo's real deploy mechanism. Write `unknown` and an ambiguity if the repo does not say.
+7. **Ambiguities.** Blocking ones stop the file: report them to the parent instead of inventing a behaviour.
+
+---
+
+## Output
+
+Return these blocks. The parent places them under `## Sub NN` in the master plan.
+
+### Files
+
 | Action | Path | Notes |
 |--------|------|-------|
-| change | ... | ... |
+| change | | |
 
-## Scaffold
-<!-- APIs, shapes, contracts — Build agent reads this -->
+### Scaffold
 
-## Tests to Write
-| File | describe/it | Assertion intent |
-|------|-------------|------------------|
-| ... | ... | ... |
+### Deploy
 
-## Done Criteria
-- [ ] Gates green: ...
-- [ ] Manual smoke: ...
-
-## Ambiguities
-<!-- empty if none -->
-
-## Build
-- Mode: Cursor Build (Agent)
-- Skills: /caveman ultra + /ponytail
-- Input: this sub-plan only; no scope creep vs master-plan
-```
+- alone: flag, dormant route, additive, or yes
+- requires deployed: none or step numbers
+- revert: code rollback, or the recovery this repo needs

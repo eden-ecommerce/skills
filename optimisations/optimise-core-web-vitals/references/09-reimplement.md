@@ -49,7 +49,7 @@ Next: `cacheComponents` + `use cache` on stable chrome; dynamic data in smallest
 
 Human approves plan → Build in subs (one metric or route per sub) → `/optimise-core-web-vitals` verify each sub.
 
-Align with `docs/cursor-plan-mode.md` orchestration when feature-sized.
+Align with `docs/software-development-lifecycle.md` when the work is a feature.
 
 ## Do not
 

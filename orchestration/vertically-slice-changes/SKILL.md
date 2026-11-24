@@ -30,7 +30,13 @@ Before modifying any code, present a **Vertical Slice Plan** conforming to these
 
 Read the host from `git remote get-url origin`. A `github.com` URL uses the GitHub path. A GitLab URL uses the GitLab path. If the host is unclear, ask before creating branches.
 
-Branch hierarchy is the same on both hosts. Each review targets the branch under it:
+The base branch is `main`. A PHP repo (`composer.json` present and `vercel.json` absent) uses `develop`. Do not open a slice against `master`. Do not merge into `develop` or `master`. Do not push `develop`, `master`, or the `production` remote. A person does that after review. See [references/pull_request_template.md](references/pull_request_template.md).
+
+**Push gate.** Before every `git push`, read `git branch --show-current`. Stop when the branch is `main` or `master`, or when the refspec is `main`, `master`, `HEAD:main`, or `HEAD:master`. A feature branch push is allowed. Do not `gh pr merge` or `glab mr merge`. A person lands the slice on the base branch.
+
+**Commit.** One line: `type(entity): outcome`. Type is `fix`, `chore`, `doc`, or `feature`. Entity is the table or the domain. Outcome is the task result, caveman. Author stays the existing git identity. No `--author`, no `--trailer`, no `Co-authored-by`, no `Signed-off-by`, no provider name. Do not change git config. Do not commit on `main` or `master`.
+
+Branch hierarchy is the same on both hosts. Each review targets the branch under it. For a PHP repo, replace `main` below with `develop`:
 
 ```text
 main
@@ -39,7 +45,7 @@ main
            └── feature/<name>/slice-3-ui    (review 3 -> base: feature/<name>/slice-2-core)
 ```
 
-Commit with `git add` and `git commit` so each slice contains only its own files. Pass branch names exactly as above.
+Commit with `git add` and `git commit -m "type(entity): outcome"` so each slice contains only its own files. Pass branch names exactly as above. The message follows the commit rule above.
 
 ### GitHub
 
@@ -93,7 +99,9 @@ A developer should be able to test this slice without reading the other reviews.
 
 A slice that does not compile is not a slice. Land a file after the files it imports. Each slice stays safe to deploy on its own, through a feature flag, a dormant route, or an additive change. If a slice cannot be deployed alone, say so in the body and split the slice until it can.
 
-Write the body in plain sentences. Do not use em dashes. Do not use filler such as "ensuring" or "highlighting". Do not start a line with a bold label that repeats the sentence. The body uses only these headings from [references/pull_request_template.md](references/pull_request_template.md): Summary, Scope, Dev test plan, Deployment plan, Reversion plan. Leave the other headings in that file out of the review. Where one of these five names a system this repo does not have, write "none" for that line. Do not delete the heading.
+Write the body in plain sentences. Do not use em dashes. Do not use filler such as "ensuring" or "highlighting". Do not start a line with a bold label that repeats the sentence. The body uses only these headings from [references/pull_request_template.md](references/pull_request_template.md): Summary, Scope, Dev test plan, Deployment plan, Reversion plan.
+
+Run the file checks in that template before filling Deployment plan or Reversion plan. Keep each subsection the check matched. Delete every subsection it did not match. Do not leave another repo's deploy steps in this body. Where a kept line names a system this repo does not have, write "none". Do not delete a heading that the check kept.
 
 ### Summary
 
@@ -117,13 +125,13 @@ Numbered checks for this branch only. Name the command, the URL, and the click p
 
 Heading in the template: `## Deployment plan`.
 
-1. Merge this pull request only.
-2. Deploy this slice. Name the real command for this repo.
-3. Run the dev test plan on the deployed result.
-4. Point the next review at `main`. On GitHub, run `gh stack sync --remote origin`. On GitLab, rebase the next branch onto `main`, run `git push --force-with-lease`, then `glab mr update <id> --target-branch main --yes`.
-5. Do not merge the next slice until this one has been deployed and tested.
+Copy the numbered steps from the sections the file checks kept. Do not invent a host.
 
-Design and lib publish with Changesets and a `design-v*` or `lib-v*` tag. A consumer then pins that exact version. An app deploys on its own host. Write that path in the body. Do not invent a host.
+1. Merge this pull request only, into `main`, or into `develop` for a PHP repo.
+2. Deploy this slice by the kept section. A PHP production push, `worker-deploy`, and `terraform apply` are a person's actions. The agent does not run them.
+3. Run the dev test plan on the deployed result.
+4. Point the next review at the base branch (`main`, or `develop` for PHP). On GitHub, run `gh stack sync --remote origin`. On GitLab, rebase the next branch onto that base, run `git push --force-with-lease`, then `glab mr update <id> --target-branch <base> --yes`.
+5. Do not merge the next slice until this one has been deployed and tested.
 
 ### Reversion plan
 

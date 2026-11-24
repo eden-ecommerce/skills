@@ -1,68 +1,51 @@
 ---
 name: handoff-plan
-description: "SDLC thread switch; zero-loss copy-paste payload — master/sub/test status, paths, gates, exact next step. Use on unknowns, context loss, or new chat."
+description: "Copy-paste handoff when a thread switches. Master, active sub, ready gate, and the next command. Use on context loss or a new chat. No code."
 agents:
   - cursor
 ---
 
-/caveman ultra
-
-**Bind:** `.cursor/STRUCTURE.md` + `.cursor/CONTEXT.md`. Read all plan artefacts in `docs/feature/<feature>/`.
-
-**SDLC:** Preserve context across thread switch. **No code.**
-
-**Trigger:** unknowns block progress, plan review in new chat, context window full.
-
----
+**No code.** Read the plan files in `docs/feature/<feature>/`. Read the **Repos** row for the active sub before naming gates.
 
 ## Extract
 
-1. **Slugs** — feature, step, task from master header + active sub row
-2. **Master status** — `{feature}-master-plan.md` done vs pending subs
-3. **Approvals** — `matrix-flow` and `ambiguity-echo` status from the master Approvals table
-4. **Active sub** — `sub-plans/{step}-{task}-sub-plan.md` path + Goal one-liner
-5. **Test-plan** — `test-plans/{step}-{task}-test-plan.md` approved? manual ticks open?
-6. **Architecture** — file paths, DB tables, API routes from plans (no secrets)
-7. **Last gates** — pass/fail + command output summary if failed
-8. **Next action** — if either approval is not `acknowledged`, the next action is to answer that gate. Else: skill invoke, amend file, or Build
-
----
+1. Feature, home repo, and the first unchecked **Subs** row.
+2. `ready` from **Approvals**.
+3. The first unchecked `## Sub` heading, its outcome, and `Needs`.
+4. That sub's Tests table: manual rows still open.
+5. **Deviations** rows.
+6. Key paths from that sub's Files table. No secrets.
+7. Last Sync Log line.
 
 ## Output
 
-Single copy-paste block only:
+One block:
 
 ```md
-## HANDOFF — {feature} / {step}-{task}
+## HANDOFF — {feature} / {step}-{repo}-{task}
 
-### Slugs
-- feature: {feature}
-- step: {step}
-- task: {task}
+### Master
+- file: docs/feature/{feature}/{feature}-master-plan.md
+- ready: pending | {date}
+- pending subs: 02, 03
 
-### Master ({feature}-master-plan.md)
-- done: [x] ...
-- pending: [ ] ...
+### Active sub
+- heading: ## Sub {step}
+- outcome:
+- needs:
+- rules:
 
-### Approvals
-- matrix-flow: pending | acknowledged
-- ambiguity-echo: pending | acknowledged
+### Tests
+- manual open: N
 
-### Active Sub (sub-plans/{step}-{task}-sub-plan.md)
-- goal: ...
-- blocking: none | ...
-
-### Test Plan (test-plans/{step}-{task}-test-plan.md)
-- approved: yes/no
-- manual open: N rows
-
-### Key Paths
-- files: ...
-- schema: ...
+### Deviations
+- rows: none | ids
 
 ### Gates
-- last run: pass/fail — ...
+- last run:
 
-### NEXT (run this first)
-→ {answer gate matrix-flow | answer gate ambiguity-echo | /construct-sub-plan for {step}-{task} | amend {file} | Build from sub-plans/{step}-{task}-sub-plan.md}
+### NEXT
+→ {finish construct-master-plan | Build via implement-plan | /merge-plan | /vertically-slice-changes on step NN}
 ```
+
+The next command is Build when `ready` is a date and a sub is still open. It is `/merge-plan` when every sub is built and gates passed. It is finish planning when `ready` is pending.

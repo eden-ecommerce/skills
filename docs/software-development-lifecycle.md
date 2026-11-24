@@ -1,81 +1,74 @@
-# Software Development Lifecycle
+# Software development lifecycle
 
-Task brief + PM sign-off = source of truth. Orchestration skills live in `orchestration/` — self-research from brief; no dependency on `documentation/` skills (those are optional user tools).
-
-Plan artefact layout:
+One plan, then build, then deploy. Ambiguities are settled in the briefing, before any code. Build does not invent behaviour and does not ask new questions. The master plan is the only build input, so the work cannot drift into a second plan.
 
 ```
 docs/feature/{feature}/
+  references/
   {feature}-master-plan.md
-  {feature}-delivered-feature-plan.md
-  sub-plans/{step}-{task}-sub-plan.md
-  test-plans/{step}-{task}-test-plan.md
+  merge-requests/{step}-{repo}-{task}.md
 ```
 
-| Phase | Philosophy | Skill | Artefact |
-|-------|------------|-------|----------|
-| Requirement Analysis | objectives, deliverable phases, prioritise | `/construct-master-plan` | `{feature}-master-plan.md` |
-| System Design | input/output matrix, process flows, ambiguity gates | `/construct-master-plan` then `/construct-sub-plan` | master plan, then `sub-plans/{step}-{task}-sub-plan.md` |
-| Test Design | unit/integration specs + manual checklist **before Build** (per sub) | `/construct-test-plan` | `test-plans/{step}-{task}-test-plan.md` |
-| Implementation | amend plans → Cursor Build + `/ponytail` | human + Agent (sub-plan Build block) | code diff |
-| Integration & Testing | run Gates + tick manual rows from test-plan | human | test-plan `[ ]` ticks |
-| Post-Build QA | diff review, scope, standards | `/review-implementation` | audit report |
-| Reconcile | sync plan truth vs code | `/sync-plan` | updated master + sync log |
-| Deployment | ready ack → delivered record + MR | `/merge-plan` | `{feature}-delivered-feature-plan.md`, MR description |
-| Maintenance | master + delivered plan in MR; monitor prod | `/merge-plan` + ops | MR overview, Sentry/Vercel/DB |
+Each `## Sub` is one repo and one deployable step. Sub 01 deploys on its own. Each later sub names the steps that must already be deployed. The sub section holds the files, the matrix, the flow, the tests, and the deploy steps.
 
-## Requirement Analysis
+| Step | You type | Skill | Result |
+|------|----------|-------|--------|
+| 1 | `/construct-master-plan` plus the brief | [construct-master-plan](../orchestration/construct-master-plan/SKILL.md) | Briefing, decisions, one master plan with `ready` set |
+| 2 | Click Build | [implement-plan](../orchestration/implement-plan/SKILL.md) | That plan, built in order. Automated tests and gates pass |
+| 3 | `/merge-plan` | [merge-plan](../orchestration/merge-plan/SKILL.md) | As built in the same file. One MR body per sub |
 
-* starts with task brief
-* optional: [task-refinement-prompt.md](task-refinement-prompt.md) in ChatGPT before `/construct-master-plan`
-* outline objectives
-* break down into deliverable phases. Each phase names tests that already exist and must still pass
-* prioritise subtasks under those phases
+`/vertically-slice-changes` runs only when a sub is too big for one review.
 
-## System Design
+## What you type
 
-* `/construct-master-plan` — repo recon, blast radius, one input/output row per combination, current and proposed flow per phase
-* human approves the matrix and flows before anything else (`matrix-flow`)
-* ambiguities sit at the bottom of the master plan. The user answers each one. The agent restates the choices and waits before writing Decisions (`ambiguity-echo`)
-* `/construct-master-plan` then walks one unchecked sub at a time. It writes that sub-plan itself. Cite phase and matrix row ids; do not copy the matrix
-* communicate blocks / priorities
-* identify edge cases and tests (`/construct-test-plan` per sub)
+1. `/construct-master-plan @docs/feature/giftnotes/references/giftnotes.md` and one line of constraints, for example "new route in @EdenApi.php".
+2. Read the briefing. It has the current behaviour, the expected outcome, a flow diagram, and a matrix. Answer the open choices.
+3. Click Build.
+4. Run the manual rows in each sub's Tests table.
+5. `/merge-plan giftnotes`
 
-## Implementation
+## Why one file
 
-* write master plan — context (SQL, file refs, sources; no secrets in git)
-* `{feature}-master-plan.md` orchestrates phases, the matrix, the flows, and progress checkboxes
-* sub plans per priority in `sub-plans/` — Build-ready scaffold
-* test plans per sub in `test-plans/`
-* manually read + amend plans
-* unknowns / gaps → discuss team + `/handoff-plan` → new thread
-* plan signed off → **Cursor Build** (`/caveman ultra` + `/ponytail`)
-* plan errors → revert Build, rebuild sub plan
-* user says the sub is complete → `/construct-master-plan` restates the diff, then writes As built, matrix status, and a Sync Log row on the master, then walks the next sub
+A second plan, a second critique, and a feedback table each re-read the same scope. That spends tokens and lets the build diverge from the decision. Subagents receive one `## Sub` section, not the whole plan.
 
-## Integration & Testing
+## Rules per repo
 
-* `/construct-test-plan` per sub before Build — `/tdd` specs unbiased by impl
-* after Build: run automated tests via STRUCTURE Gates
-* tick manual rows in test-plan when verified
-* fail → revert + refine master/sub plan
+The master plan **Repos** table lists each repo's root, gate commands, merge request template, and rule files. Every subagent reads that list before it plans, builds, or reviews. A missing `.cursor/STRUCTURE.md` does not stop the run.
 
-## Deployment
+Cursor loads `alwaysApply` rules for the files you have open. It does not load them for a subagent. The table is what makes the subagent follow them.
 
-* pnpm Gates — lint, ts-check (per STRUCTURE)
-* user acknowledges the feature is complete and ready for deployment
-* `/construct-master-plan` writes `{feature}-delivered-feature-plan.md` from the diff: original matrix and diagrams kept, as-shipped matrix and diagrams beside them, then the MR body from that file + all test-plan proofs
-* remove incomplete / abandoned plan files
+## Human gates
 
-## Maintenance
+The briefing in step 1. Manual test rows that automation cannot run. A person lands code on `main` and `master`. PHP production push, `worker-deploy`, and `terraform apply` stay with a person.
 
-* master plan stays the planning record. `{feature}-delivered-feature-plan.md` is what shipped. Store both in the MR overview
-* post-deploy: Sentry, Vercel, DB error logs
+The agent does not push `main` or `master` and does not merge the request. Commit one line: `type(entity): outcome`. No co-author trailer.
 
-## Thread switch
+## Building blocks
 
-`/handoff-plan` — copy-paste payload for new chat. Includes `matrix-flow` and `ambiguity-echo` status. An open gate stays open until the user answers it.
+The daily drivers call these. You can still run them on their own.
 
-## Cursor workflow
+| Skill | When |
+|-------|------|
+| `/refine-plan` | You edited the master plan by hand after `ready` |
+| `/construct-sub-plan` | One sub section needs a new scaffold |
+| `/construct-test-plan` | One sub needs its Tests table rewritten |
+| `/review-implementation` | A diff needs a review outside Build |
+| `/handoff-plan` | The thread is switching |
+| `/generate-handoff-doc` | A process or a rebuild is too large to hold in the chat |
+| `/clarity-with-stakeholder` | A PM needs the plain-English version |
 
-See [cursor-plan-mode.md](cursor-plan-mode.md).
+`/sync-plan` is deprecated. `/merge-plan` writes what shipped.
+
+## Plan mode and models
+
+Step 1 runs in Plan mode and writes `docs/feature/{feature}/{feature}-master-plan.md`. It does not call CreatePlan.
+
+Use a high model for step 1. Use a fast model for step 2. Step 3 can use either.
+
+## Optional, before step 1
+
+Paste a raw task through [task-refinement-prompt.md](task-refinement-prompt.md) when the brief is still a Slack message. The master plan reads that output. It does not require it.
+
+## Target repo
+
+Copy [AGENTS.md](AGENTS.md) to the repo root. Keep `.cursor/rules/` and, when the repo has them, `.cursorrules`, `.cursor/STRUCTURE.md`, and `.cursor/CONTEXT.md`.

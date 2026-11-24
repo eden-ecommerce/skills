@@ -1,4 +1,4 @@
-<!-- SDLC phase 1 — Requirement Analysis. Human step: paste into ChatGPT before /construct-master-plan in Cursor. See docs/software-development-lifecycle.md -->
+<!-- Optional, before SDLC step 1. Paste into ChatGPT when the brief is still a Slack message. See docs/software-development-lifecycle.md -->
 
 You are a principal software engineer reviewing a development task BEFORE implementation begins.
 

@@ -1,45 +1,49 @@
 ---
 name: generate-handoff-doc
 description: >-
-  Explore @file scope → write greenfield rebuild handoff for dev in new project.
-  Creds, SEO, tracking, external IDs, data flow. Trigger: handoff doc, rebuild
-  guide, reimplementation, generate-handoff-doc.
-disable-model-invocation: true
+  Explore a file or a process and write a handoff a developer can trust.
+  Rebuild guide, or a process explainer for a master plan. Creds, routes,
+  data flow, external IDs. Trigger: handoff doc, rebuild guide, reimplementation,
+  generate-handoff-doc, explain this process.
+disable-model-invocation: false
 ---
 
 # generate-handoff-doc
 
-Greenfield rebuild handoff. User gives `@file` + short context. Explore. Write. No rigid template.
+Two modes. The user gives `@file` and a short context, or a master-plan skill names a process.
 
-**Output:** `docs/{feature}-handoff.md` unless user says otherwise.
+**Rebuild** (default): greenfield handoff for a new project. Output `docs/{feature}-handoff.md` unless the user says otherwise.
 
-Missing scope → one ask → else infer from files.
+**Process explainer:** how a process works in this codebase, for a master plan. Output `docs/feature/{feature}/references/{topic}-handoff.md`. Use this mode when construct-master-plan asks, or when the user says "explain this process".
+
+Missing scope → one question → otherwise infer from the files.
 
 ## Explore
 
-1. Read `@files` → follow imports until data, layout, config are clear
-2. Parallel explore if scope is wide
-3. Trace backend/CMS in workspace — don't guess IDs
-4. Grep env vars from code; note if `.env.example` missing
+1. Read the `@files`. Follow imports until data, layout, and config are clear.
+2. Use parallel exploration when the scope is wide.
+3. Trace the backend or CMS in the workspace. Do not guess ids.
+4. Grep env var names from the code. Note a missing `.env.example`.
 
-Don't edit plan files. Don't commit unless asked.
+Do not edit plan files. Do not commit unless asked.
 
-## Write only tribe secrets
+## Write only what search misses
 
-Stuff easy to miss in code search. Delete anything dev finds in one file.
+Delete anything a developer finds in one file.
 
-- **Routes** — internal path vs public URL; ISR/cache; proxy/rewrite rules outside repo
-- **Data** — who fetches what; auth per endpoint
-- **Creds** — env name → purpose; server-only vs public; OAuth scopes
-- **External IDs** — Sanity `_id`/`_type`, CMS doc IDs, category/dept IDs, memcache keys
+- **Routes** — internal path and public URL; cache; proxy or rewrite rules outside the repo
+- **Data** — who fetches what; auth on each endpoint
+- **Creds** — env name and purpose; server-only or public; OAuth scopes. Never write secret values.
+- **External IDs** — Sanity `_id` / `_type`, CMS doc ids, category ids, cache keys
 - **SEO** — canonical pattern, metadata source, JSON-LD
-- **Tracking** — GTM/Sentry/beacon/Algolia; page vs layout chrome; env vars; what's NOT in repo
-- **Packages** — feature deps vs site shell
-- **Rebuild checklist** — phased bullets dev can tick off
+- **Tracking** — GTM, Sentry, beacon, Algolia; what is not in the repo
+- **Packages** — feature deps and the site shell
+- **Process** — actor, input, output, and the branch that changes the outcome. Cite `path:line`.
+- **Rebuild checklist** — phased bullets, in rebuild mode only
 
-Mermaid/snippets/tables when they clarify. Real code, repo-relative paths.
+Use a mermaid diagram, a snippet, or a table when it makes the path clearer. Real code. Paths relative to the repo.
 
-## Eg
+## Example
 
 ```
 @articles/page.tsx @article/[articleId]/page.tsx

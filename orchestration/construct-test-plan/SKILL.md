@@ -1,89 +1,31 @@
 ---
 name: construct-test-plan
-description: "SDLC test design pre-Build; edge cases + /tdd specs (no impl bias) + manual tick checklist; output test-plans/{step}-{task}-test-plan.md per sub. Use before Cursor Build when test plan missing or stale."
+description: "Test design for one sub-plan, before Build. Edge cases, security cases, automated specs, and a manual checklist. Use from construct-master-plan, or when a test plan is missing."
 agents:
   - cursor
 ---
 
-/caveman ultra
+**No code.** The Tests table for one sub, inside the master plan. Specs describe the plan, not the current implementation.
 
-**Bind:** `.cursor/STRUCTURE.md` + `.cursor/CONTEXT.md`. Read slugs from master plan header + active sub-plan.
+**Input:** the sub's matrix rows and the master **Edge Cases** table.
 
-**SDLC:** Test design **before Build** — unbiased by impl code or diff. **One test-plan per sub-plan.**
-
-**Artefact path:** `docs/feature/<feature>/test-plans/{step}-{task}-test-plan.md`
-
-**Input:** brief + `{feature}-master-plan.md` + active `sub-plans/{step}-{task}-sub-plan.md`.
-
-**Do not:** read impl diff, open production files written for this task, invoke execute-test skill.
+**Do not** read the implementation diff or production files written for this task. Do not write `test-plans/`.
 
 ---
 
-## Phases
+## Steps
 
-### 1. Edge cases
-- 5+ non-obvious cases: nulls, race, auth fail, timeout, abuse, double-submit, refresh, back nav
-- tie each to master Impact + sub-plan Goal
-
-### 2. /tdd bind
-- unit + integration **specs only**
-- columns: file path | `describe`/`it` | assertion intent | red-first?
-- no production code — specs describe expected behaviour from **plan**, not from existing impl
-
-### 3. Manual matrix
-- UI / flow steps human ticks after Build
-- columns: step_id | action | expected | `[ ]`
-
-### 4. Human gate
-- approve test-plan before Build
-- gaps → amend sub-plan or master; do not Build until aligned
+1. **Edge cases.** Take every master **Edge Cases** row this sub owns. Add cases the matrix missed: empty input, boundaries, auth failure, wrong owner, illegal state, race, double submit, refresh, back navigation, timeout, partial failure.
+2. **Security.** Add abuse cases from OWASP WSTG for the controls in the master **Security** section. Each case names a WSTG id and the matrix row it proves, or `extra` when the matrix has no row.
+3. **Automated specs.** File path, `describe` / `it`, assertion intent, red-first. No production code and no implementation hints.
+4. **Manual checklist.** The clicks a person runs after Build. Columns: step_id, action, expected, pass.
 
 ---
 
-## Stop gates
+## Output
 
-- human approves test-plan
-- open test gaps vs sub-plan scaffold → amend plans first
+Return one table. The parent places it under that sub's Tests heading. Do not write a file.
 
----
-
-## Next
-
-Human amend all plans → Cursor Build (`/caveman ultra` + `/ponytail` per sub-plan Build block).
-
-User runs automated tests via Gates during/after Build; ticks manual `[ ]` rows when verified.
-
----
-
-## Output template
-
-Write file `test-plans/{step}-{task}-test-plan.md`:
-
-```md
-# Test Plan — {step}-{task}
-
-| Slug | Value |
-|------|-------|
-| feature | {feature} |
-| step | {step} |
-| task | {task} |
-| master | {feature}-master-plan.md |
-| sub | sub-plans/{step}-{task}-sub-plan.md |
-
-## Edge Cases
-1. ...
-2. ...
-
-## Automated Tests (/tdd specs)
-| File | describe/it | Assertion intent | Red-first |
-|------|-------------|------------------|-----------|
-| ... | ... | ... | yes |
-
-## Manual Checklist
-| step_id | action | expected | pass |
-|---------|--------|----------|------|
-| 1 | ... | ... | [ ] |
-
-## Pass Criteria (for merge-plan)
-<!-- summary bullets for Verification Proof section -->
-```
+| # | edge | wstg | check | expected |
+|---|------|------|-------|----------|
+| 1 | 1 | WSTG-INPV-01 | automated or manual | |

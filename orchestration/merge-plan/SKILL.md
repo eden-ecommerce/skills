@@ -1,164 +1,75 @@
 ---
 name: merge-plan
-description: "SDLC deployment; reconciled master + test-plan ticks + Gates → user ack ready for deployment → {feature}-delivered-feature-plan.md + MR description. Use when all subs synced."
+description: "Deploy step. Write what shipped back into the one master plan and a merge request body per sub. Use after Build, when the plan's automated tests passed."
 agents:
   - cursor
 ---
 
-/caveman ultra
+**Deploy the plan that was built.** No new feature code. Docs and merge request bodies only.
 
-**Bind:** `.cursor/STRUCTURE.md` + `.cursor/CONTEXT.md`.
+**Input:** `{feature}-master-plan.md` and the git diff per repo.
 
-**SDLC:** Deployment / merge request. All subs checked off in master. Gates green.
+**Refuse** when `ready` is `pending`. A diff that adds behaviour with no matrix row is a deviation, not a new feature. Do not extend the plan to match the creep. Record it and stop that sub's body until the user deletes the extra diff or accepts the deviation in **Decisions**.
 
-**Input:**
-- reconciled `{feature}-master-plan.md`
-- completed sub-plans
-- all `test-plans/{step}-{task}-test-plan.md` tick summaries
-- green STRUCTURE **Gates**
-- git diff (final)
-
-Do not write the MR or the delivered file until the user acknowledges the feature as complete and ready for deployment.
+**Bind:** read **Repos**. Each body uses that repo's `mr_template`.
 
 ---
 
-## Phases
+## Flow
 
-### 1. Read truth
-- master plan = source for Summary + Architecture, and for the original phases, matrix, diagrams, and decisions
-- aggregate Pass Criteria + ticked rows from all test-plans = Verification Proof
-- diff + completed sub-plans = what the code actually does
+### 1. Read what shipped
 
-### 2. Ready gate
-- ask the user to acknowledge the feature as complete and ready for deployment
-- stop until they do. Do not infer acknowledgement from green Gates
+For each repo, read `git diff` against the default branch (`origin/main`, else `origin/master`). The diff wins over the plan text.
 
-### 3. Delivered feature plan
-- write `docs/feature/{feature}/{feature}-delivered-feature-plan.md` from the diff, completed sub-plans, and ticked test-plans
-- master plan stays the planning record. Do not replace it with the shipped record
-- keep the same phase ids, matrix row ids, and diagram node ids
-- carry every original matrix row. Do not summarise combinations the master listed
-- for each phase, matrix, and diagram show **Original** (copied from the master) and **As shipped** (rewritten from the code)
-- matrix status per row: `unchanged` | `changed` | `dropped` | `added`
-- changed and added rows state the output and side effect the code produces, with the file path
-- dropped rows say what was not built
-- third mermaid per phase, **as shipped**, traced from the code. Node ids camelCase, no spaces. `TODO` only where the operation is still missing. Do not invent branches
-- Deviations table: row id, original behaviour, shipped behaviour, why
-- tests that passed: file + test name + gate result
+Read automated and manual rows in each sub's **Tests** table. Unticked manual rows are listed as not run. Do not tick them yourself.
 
-### 4. Cleanup note
-- list abandoned `sub-plans/{step}-{task}-sub-plan.md` files removed
-- list obsolete `test-plans/{step}-{task}-test-plan.md` files removed
-- incomplete plans deleted from artefact dir
+### 2. Update the master plan
 
-### 5. Write MR body
-- raw markdown — paste to Git platform
-- Plan Artefacts lists the delivered file
+On each sub that has a diff:
 
----
+- check that sub's heading
+- fill **As built** with the actor, the input, and the output the code produces
+- set each matrix row `status` to `shipped`, `changed`, `dropped`, or `added`
+- a `changed` or `added` row states the output, the side effect, and `path:line`
+- a `dropped` row says what was not built
+- append **Deviations** for anything that is not `shipped`
+- append **Sync Log** with the date, the step, the gate results, and the manual rows still open
 
-## Delivered file template
+Keep the original matrix rows. Do not delete a planned row.
 
-~~~~md
-# {Feature Title} — delivered
+### 3. One merge request body per sub
 
-| Slug | Value |
-|------|-------|
-| feature | {feature} |
-| master | {feature}-master-plan.md |
-| acknowledged | {date} — ready for deployment |
+Write `merge-requests/{step}-{repo}-{task}.md`.
 
-## What shipped
-{short sentences from the diff: actor, input, output}
+Read the template file at `mr_template`. Keep that file's headings. Fill them from this sub's diff only. Delete placeholder comments. Where a heading does not apply, write `none`. Do not invent commands, URLs, SQL, or hosts. Do not add headings the template does not have.
 
-## Deliverable Phases
-
-### Phase 01 — {name}
-
-#### Original
-Outcome: {copied from master}.
-Depends on: none | Phase NN.
-
-#### As shipped
-Outcome: {what the code does}.
-Depends on: none | Phase NN.
-
-Tests that passed:
-
-| File | Test name | Gate result |
-|------|-----------|-------------|
-| ... | ... | pass |
-
-## Input / Output Matrix
-
-### Phase 01 — original
-
-| id | operation | when | output | side effect | repo source |
-|----|-----------|------|--------|-------------|-------------|
-| P01-01 | ... | ... | ... | ... | ... |
-
-### Phase 01 — as shipped
-
-| id | status | operation | when | output | side effect | repo source |
-|----|--------|-----------|------|--------|-------------|-------------|
-| P01-01 | unchanged \| changed \| dropped \| added | ... | ... | ... | ... | path:line |
-
-## Process Flows
-
-### Phase 01 — original current
-
-```mermaid
-flowchart TD
-  startNode[Start] --> operationNode[Operation]
-```
-
-### Phase 01 — original proposed
-
-```mermaid
-flowchart TD
-  startNode[Start] --> operationNode[Operation]
-```
-
-### Phase 01 — as shipped
-
-```mermaid
-flowchart TD
-  startNode[Start] --> operationNode[Operation]
-```
-
-## Decisions kept
-<!-- copied from master Decisions -->
-
-## Deviations
-
-| id | original behaviour | shipped behaviour | why |
-|----|--------------------|-------------------|-----|
-| P01-01 | ... | ... | ... |
-~~~~
-
----
-
-## MR template
+When `mr_template` is `default`, use only these headings:
 
 ```md
 ## Summary
-<!-- 2-3 sentences from master Context + what shipped -->
 
-## Architectural Changes
-<!-- bullets: structural updates, DB, API — from delivered file + diff -->
+## Scope
 
-## Verification Proof
-<!-- from all test-plans: automated pass, manual ticks, gates run -->
+## Test steps
 
-## Maintenance
-<!-- Sentry, Vercel, DB CPU, alerts — from master Impact -->
+## Reviewer checklist
 
-## Plan Artefacts
-- master: docs/feature/{feature}/{feature}-master-plan.md
-- delivered: docs/feature/{feature}/{feature}-delivered-feature-plan.md
-- sub-plans: docs/feature/{feature}/sub-plans/
-- test-plans: docs/feature/{feature}/test-plans/
-- abandoned plans removed: ...
+## Deployment
+
+## Reversion
 ```
 
-Post-merge: master plan and delivered feature plan live in the MR overview per SDLC Maintenance phase.
+- **Summary.** One or two sentences. What this sub changes and why.
+- **Scope.** What is in this sub. What a later sub still does. Whether this sub is safe to deploy on its own. Package pin, or `none`.
+- **Test steps.** Numbered. The gate commands that passed, then the manual rows from that sub's Tests table. Name the command, the URL, and the click path when the diff contains them.
+- **Reviewer checklist.** Leave the boxes unchecked. Include only checks this repo's rules already require.
+- **Deployment.** Merge this request only. Choose the steps with the file checks in [vertically-slice-changes/references/pull_request_template.md](../vertically-slice-changes/references/pull_request_template.md). Keep the sections that match. Delete the rest. The earlier step that must already be deployed (`requires 01 deployed`), or `none`. Do not merge the next sub until this one is deployed and tested. For a PHP repo, write the human steps and do not run them. Do not push `develop`, `master`, or the `production` remote.
+- **Reversion.** How to undo this sub without undoing a later one, from the matching reversion block in that template. When the diff has a migration, say code rollback is not enough and name the recovery. When it does not, write `code rollback`.
+
+### 4. Flag large diffs
+
+Count changed lines per sub (`git diff --numstat` on that sub's files). A sub over about 300 changed lines is too big for one review. List those steps and tell the user to run `/vertically-slice-changes` on that repo. Do not split the branches in this skill.
+
+### 5. Stop
+
+Do not push and do not open the merge request unless the user asks. A person lands code on `main` and `master`. Never push those branches, never push those refspecs, and never `gh pr merge` or `glab mr merge`. Return the path of each body.

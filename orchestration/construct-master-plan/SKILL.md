@@ -1,224 +1,124 @@
 ---
 name: construct-master-plan
-description: "SDLC orchestration from brief to deploy. Self-research repo, impact analysis, requirements, system design, deliverable phases, full input/output matrix, process flows, approval gates, then one sub at a time with sync back to the master plan. Use when starting a feature, continuing a master plan, or when the user marks a sub or phase complete."
+description: "SDLC plan step. Research, explain the current state with a flow and a matrix, settle every open choice, then write one master plan. Use when starting a feature from a brief. Planning only. No code."
 agents:
   - cursor
 ---
 
-/caveman ultra
+**One plan, then build, then deploy.** Planning only. No production code. Do not call CreatePlan. In Plan mode, write the markdown file directly.
 
-**Bind:** `.cursor/STRUCTURE.md` + `.cursor/CONTEXT.md`. Task brief + PM sign-off = truth. One repo root per run.
-
-**SDLC:** One skill, start to finish. Do not send the user to another orchestration skill. Draft and gates write no production code. After both gates are `acknowledged`, walk one unchecked sub at a time. Implement only the active sub, and only when the user asks to build it. When the user marks that sub complete, write what the code actually did back into this master plan, then walk the next sub.
-
-**Artefact root:** `docs/feature/<feature>/`
+The master plan is the only build input. Do not write `sub-plans/` or `test-plans/`. A second plan file is how scope drifts.
 
 ```
 docs/feature/{feature}/
-  {feature}-master-plan.md
-  {feature}-delivered-feature-plan.md   # this skill writes this after ready-for-deployment ack
-  sub-plans/
-    {step}-{task}-sub-plan.md
-  test-plans/
-    {step}-{task}-test-plan.md
+  references/                         # brief, process handoffs
+  {feature}-master-plan.md            # the plan
+  merge-requests/                     # merge-plan writes these at deploy
 ```
 
-**Naming:** derive kebab-case `feature` (product area) from brief. Each sub row gets zero-padded `step` (`01`, `02`, …) + `task` slug (subtask scope). Write slugs in plan header — sub/test skills reuse them. Matrix row ids are `P{phase}-{nn}` (`P01-01`).
+**Naming:** kebab-case `feature` from the brief. Each sub is `{step}-{repo}-{task}` with `step` zero-padded (`01`, `02`). Matrix row ids are `S{step}-{nn}` (`S01-01`).
 
-**Input:** user brief, or an existing `{feature}-master-plan.md` plus "sub {step} complete" / "phase {nn} complete" / "next". Human may paste prior ChatGPT output from `docs/task-refinement-prompt.md` — read only; do not invoke external skills.
+**Input:** a brief file, an `@` reference, or pasted text. Optional one-line constraints ("new route in EdenApi.php").
 
-**Resume:** if the master plan file already exists, do not redraft from scratch. Read it. The active sub is the first unchecked row under Deliverable Phases.
+**Home repo:** the repo that holds `docs/feature/<feature>/`. If the user names a directory, that repo is home. If a master plan already exists, that repo is home.
 
-**Write rule:** short sentences. Name the actor, the input, and the output. No essay paragraphs in matrix or flow sections. Forbidden fillers: "etc", "various", "as needed", "handle appropriately".
+**Resume:** if `{feature}-master-plan.md` exists and `ready` is a date, do not redraft it. Tell the user to click Build. If `ready` is `pending`, continue from the first unfinished step. Do not open a second planning pass.
 
----
+**Write rule:** short sentences. Name the actor, the input, and the output. Forbidden fillers: "etc", "various", "as needed", "handle appropriately".
 
-## Planning methodology (run in order before the artefact is final)
+**Evidence:** a claim marked verified cites `path:line` or a standard URL plus the section. Anything else is labelled inferred. Open the file before citing it.
 
-Work through these three planning passes in the chat and in Research Notes. Do not skip ahead to sub-plans until the master draft exists and both approval gates are satisfied.
-
-### Pass A — Top-level impact analysis
-
-- Evaluate the full task brief against the current repo (`git status`, `git diff`, grep brief keywords).
-- Read neighbour files per STRUCTURE patterns. Open files you cite — do not guess paths.
-- Map **blast radius**: shared modules, DB tables, API routes, env vars, feature flags, cross-app contracts.
-- List **architectural conflicts** with existing patterns (naming, layering, auth, data flow).
-- Note **migration / rollout** risks and backwards-compat constraints.
-- Record who to ask for each open technical question (**role**, not person).
-- Output lands in **Impact & Blast Radius** and **Research Notes** (files read, grep hits, inferred vs verified).
-
-### Pass B — Requirement analysis
-
-- Extract **objectives** from the brief — verbatim where possible.
-- **Scope in** and **scope out** — explicit bullets. If the brief is silent, state the default and add an ambiguity row.
-- Pull **acceptance hints** and **constraints** (performance, compliance, tenancy, deadlines).
-- Break work into **logical subtasks**. Order by execution priority and dependencies.
-- Use Pass A findings so ordering does not hide breaking changes behind later steps.
-- Group subtasks into **deliverable phases** (shippable slices). Each phase gets one outcome sentence.
-- Output lands in **Objectives**, **Scope**, **Deliverable Phases** (checkbox rows), and **Gaps** when you have evidence.
-
-### Pass C — System design
-
-- **Technical limits** and platform constraints (runtime, quotas, third-party APIs).
-- **Input/output matrix** — one row per input combination per phase (see below). Unbounded sets become ambiguity rows, not summaries.
-- **Process flows** — current vs proposed per phase; every matrix operation is a node.
-- **Edge-case categories** per phase (auth fail, null/empty, timeout, race, double-submit, abuse, back-nav, partial failure) — categories only; per-sub test specs come when walking that sub.
-- **Test strategy:** existing tests that must still pass (file + test name); new tests by name per phase; map **unit / integration / manual** areas in **Test Categories**.
-- Apply **/ponytail** posture: smallest correct diff, no speculative layers, one concern per change, match neighbour code style.
-- List **ambiguities** at the bottom with 2–3 options and tradeoffs each. Do not choose for the user.
+A missing `.cursor/STRUCTURE.md` does not stop the run.
 
 ---
 
-## Work steps (map to the master plan file)
+## Flow
 
-### 1. Repo recon
+Run these in order. Do not write sub-plans before the grilling frontier is empty, or before the user accepts a written default for each blocking question. Do not ask a grilling question until the briefing in step 4 is written.
 
-Same as Pass A. Every claim in the plan that says "verified" must trace to an opened file or command output in Research Notes.
+### 1. Find the repos
 
-### 2. Req extract
+List every repo the brief touches, from `@` paths, workspace folders, and files named in the brief. Record the home repo.
 
-Same as Pass B objectives, scope, acceptance, constraints.
+### 2. Recon, one subagent per repo
 
-### 3. Deliverable phases
+Dispatch the subagents in parallel. Each subagent returns facts, not a plan:
 
-- Each phase: outcome sentence; `Depends on: none | Phase NN`.
-- **Existing tests** that must still pass — file + test name. If none: `none found` + search used.
-- **New tests** this phase owns — names only until the sub is walked; then write `test-plans/{step}-{task}-test-plan.md`.
-- Nest sub rows under the phase. Assign `step` (`01`…`99`) in execution order.
-- Add a **phase note** when subs can run in parallel or when one sub blocks another.
-- Each sub row → `sub-plans/{step}-{task}-sub-plan.md` (created when walking that sub).
+- `git remote get-url origin` (the host)
+- whether these exist: `.cursorrules`, `AGENTS.md`, `.cursor/STRUCTURE.md`, `.cursor/CONTEXT.md`
+- every file in `.cursor/rules/`: path, `alwaysApply`, `globs`
+- merge request template path: `.gitlab/merge_request_templates/default.md`, else `.github/pull_request_template.md`, else `default`
+- gate commands named in `.cursorrules`, `AGENTS.md`, or `.cursor/STRUCTURE.md`
+- blast radius for the brief keywords: shared modules, tables, routes, env var names, flags. Open the files. Do not guess paths.
 
-### 4. Input/output matrix
+Write the **Repos** table from those reports.
 
-- One table per phase. Columns: `id`, `status` (start as `planned`), `operation`, `when`, `output`, `side effect`, `repo source`.
-- One row per **input combination**. Same operation with different inputs = different rows.
-- `repo source` = path:line or `TODO` if not in repo yet.
+### 3. Large processes
 
-### 5. Process flows
+When the brief depends on a process too large to read in this thread, follow [generate-handoff-doc](../../documentation/generate-handoff-doc/SKILL.md) in process-explainer mode. Write `references/{topic}-handoff.md` in the home repo. Do not invent the process.
 
-- Per phase: **current** and **proposed** `flowchart` (mermaid).
-- Node ids: camelCase, no spaces. `TODO` node if code missing. Do not invent branches.
-- Trace sync call chains to store / queue / outbound HTTP.
-- Mark async boundaries and authz / validation gates on the diagram.
+### 4. Brief, then grill
 
-### 6. Gaps (when applicable)
+Write the briefing first. Follow the wait-what skill: Simplified Technical English (ASD-STE100), and the terms already in the home repo `.cursor/CONTEXT.md`. One subject per sentence. The same thing keeps the same name. No question in this message.
 
-- Table: `# | gap | evidence (path:line or behaviour observed)`.
-- Use when the brief implies a problem the repo already partially solves — separate **verified gaps** from **nice-to-haves**.
+The briefing has:
 
-### 7. Ambiguities
+- **Current state.** What the code does today. Each claim cites `path:line`.
+- **Expected outcome.** One sentence. Actor, input, output.
+- **Proposed flow.** One mermaid diagram. Node ids are camelCase with no spaces.
+- **Matrix.** One row per operation. Columns: operation, when, output, side effect. This is the shape of the plan, not the final file.
+- **Each open choice.** The options, what the code does today for each, and the tradeoff in one sentence. This is the research from step 2 and step 3. Do not leave an option as a name with no explanation.
+- **Not verified.** What you could not find.
 
-- Table at the bottom: `id`, `where`, `unclear`, `blocks`, `recommendation` (options A/B/C with one-line tradeoff each).
-- Blocking ambiguities must be resolved at Gate B before sub-plans start.
+Stop. The user reads this before any decision.
 
----
+Then follow the grilling skill and the domain-modeling skill. Ask the whole frontier in one round. Number each question and give a recommended answer. Above each question, restate the current-state fact and the options in one or two short sentences, so the question can be answered from that text alone. Wait. The user decides. Look up facts yourself. Do not ask the user for anything a file or command can answer.
 
-## Formatting requirements (master plan file)
+When the user says they do not know, or asks you to simplify: do not repeat the question. Find the missing fact. Re-pitch that one choice in shorter sentences, with the new evidence. Ask again only after that re-pitch.
 
-Write these sections **in this order**. Do not omit empty sections — use a one-line placeholder if nothing applies yet.
+When a term is settled, write it into the home repo `.cursor/CONTEXT.md`. When a decision is an architecture choice later readers must not relitigate, write `docs/adr/` in the home repo.
 
-1. Header slugs table
-2. **Context** — SQL snippets, file paths, env var **names** (no secrets)
-3. **Objectives** — from brief
-4. **Scope** — in / out
-5. **Impact & Blast Radius** — Pass A summary
-6. **Gaps** — optional; evidence-backed
-7. **Research Notes** — what was read, grep hits, inferred vs verified
-8. **Deliverable Phases** — phases, tests, sub checkbox rows, phase notes, **As built** per phase (filled after subs complete)
-9. **Input / Output Matrix** — per phase
-10. **Process Flows** — per phase, current + proposed
-11. **Test Categories** — unit / integration / manual areas; detail expands in per-sub test-plans
-12. **Approvals** — `matrix-flow`, `ambiguity-echo`
-13. **Ambiguities**
-14. **Decisions** — empty until ambiguity-echo acknowledged
-15. **Sync Log** — append on each confirmed sub completion
+Stop this step when the frontier is empty, or when the user gives a written default for every question still open. Record those defaults in **Decisions**. A blocking row with no decision means the plan is not ready. Do not leave it for Build.
 
----
+### 5. Write the one plan
 
-## Stop gates
+Create `references/` and `merge-requests/` if missing. Write `{feature}-master-plan.md` from the template below. Subs, tests, flows, and deploy steps are sections in this file.
 
-Write the draft with both Approvals rows `pending` and Decisions empty. Then **stop**. Do not walk a sub yet.
+**Sub order.** Each sub is one repo and one deployable step.
 
-**Gate A — matrix-flow.** Ask the user to approve the matrix and flows, or to name the row or node that is wrong. Do not fill Decisions. Fix named rows and ask again. Set `matrix-flow` to `acknowledged` only when the user approves.
+- Sub 01 deploys on its own.
+- Each later sub sets `needs` to `none` or to the earlier steps that must already be deployed.
+- A sub is a thin working increment, not a horizontal layer. Do not split "all schema" from "all UI" when one repo can ship a usable step.
+- When a later repo cannot be safe until an earlier repo is deployed, the earlier sub stays deployable through a flag, a dormant route, or an additive change. Say which, on that sub.
+- Order is the deploy order.
+- Scope is the **Objectives** and the matrix rows. A behaviour in neither is out. Do not add one.
 
-**Gate B — ambiguities.** The table already holds recommendations. The user answers each row: accept, pick another option, or defer with a written default. The agent does not choose.
+**Edge case matrix.** One row per case. Columns: number, scenario, layer, expected, outcome. Cover empty input, length boundaries, auth failure, wrong owner, illegal state, race, double submit, injection, timeout, and partial failure. An unbounded set is an ambiguity row, not a summary. Each row is also a test under that sub.
 
-**Echo-back.** Before editing the plan, restate every decision in your own words: ambiguity id, the choice, and what will change in the phase, matrix, or diagram. Wait. On refinement, restate again. On acknowledgement, set `ambiguity-echo` to `acknowledged`, write **Decisions**, and patch the affected rows so the plan matches the words just confirmed.
+**Security.** Name the controls this feature relies on. Use the OWASP ASVS chapters that apply: authentication, access control, validation, output encoding, data protection, error handling. Each control has a verified citation or an ambiguity row. Test rows carry the OWASP WSTG ids.
 
-Prompt the human for any remaining unknowns before Gate B closes. A thread switch copies the open gate, active sub, and next action into the chat. It does not close an unanswered ambiguity and it does not start the next sub.
+### 6. Fill each sub section
 
----
+One subagent per sub, in parallel. Give it only that sub's outcome, the matrix rows it owns, and that repo's rules list. Do not paste the whole plan.
 
-## Phase loop
+The subagent follows [construct-sub-plan](../construct-sub-plan/SKILL.md) and [construct-test-plan](../construct-test-plan/SKILL.md) and returns one `## Sub NN` section. The parent inserts it. No extra files. No code.
 
-Both Approvals rows `acknowledged`. Then stay in this skill.
+### 7. Close the plan
 
-**Walk the active sub.** In the chat, cover only the first unchecked row:
+Check once, in this thread:
 
-- phase outcome and matrix row ids this sub implements
-- proposed flow nodes this sub touches
-- explicit **out of scope** for this sub
-- files to add/change, APIs, data shapes (scaffold-level)
-- tests to write (`describe` / `it` intent) and manual smoke bullets
-- STRUCTURE **Gates** for done (`pnpm lint`, `pnpm ts-check`, tests per STRUCTURE)
-- done when the user says this sub is complete
+- every ambiguity is a **Decisions** row
+- every matrix row has an output and a side effect
+- every edge-case row has a test row under its sub
+- deploy for each sub matches the file checks in [the pull request template](../vertically-slice-changes/references/pull_request_template.md)
 
-Write or refresh `sub-plans/{step}-{task}-sub-plan.md` using the sub-plan shape below. Write `test-plans/{step}-{task}-test-plan.md` if missing (edge cases, automated spec table, manual checklist). Do not copy the full matrix into the sub-plan. Stop. Do not start the next sub in the same turn.
+A failed check is fixed here. A new blocking choice goes back to step 4. Do not start Build with it open.
 
-**On "sub {step} complete" or "phase {nn} complete":**
-
-1. Read `git diff` and run Gates / tests named on that phase. Do not trust the plan text over the diff.
-2. Restate what shipped in your own words: files, output, side effect, deviations from matrix rows. Wait. On correction, restate again.
-3. After user confirms, patch the master plan: check off sub row; fill **As built** on the phase; update matrix row `status` and shipped columns; append **Sync Log**.
-4. If another sub is unchecked, walk it and stop.
-5. If every sub is checked, ask whether the feature is complete and ready for deployment. On yes, write `{feature}-delivered-feature-plan.md` from the diff (original matrix + diagrams kept; as-shipped matrix + third diagram per phase; deviations table; tests passed). Then draft the MR body. Master plan stays the planning record.
+Set **Approvals** `ready` to today's date. Tell the user the plan path and to click Build. Do not ask them to run another planning skill.
 
 ---
 
-## Sub-plan file shape (when walking a sub)
-
-~~~~md
-# {Subtask Title}
-
-| Slug | Value |
-|------|-------|
-| feature | {feature} |
-| step | {step} |
-| task | {task} |
-| phase | Phase {nn} |
-| matrix_rows | P01-01, ... |
-| master | {feature}-master-plan.md |
-| test_plan | test-plans/{step}-{task}-test-plan.md |
-
-## Goal
-
-## Out of scope
-
-## Steps
-
-## Files
-| Action | Path | Notes |
-
-## Scaffold
-
-## Tests to Write
-| File | describe/it | Assertion intent |
-
-## Done Criteria
-
-## Ambiguities
-
-## Build
-- Mode: Cursor Build (Agent)
-- Skills: /caveman ultra + /ponytail
-- Input: this sub-plan only; no scope creep vs master-plan
-~~~~
-
----
-
-## Master plan output template
-
-Create dirs `sub-plans/` + `test-plans/` if missing. Write `{feature}-master-plan.md`:
+## Master plan template
 
 ~~~~md
 # {Feature Title}
@@ -226,10 +126,14 @@ Create dirs `sub-plans/` + `test-plans/` if missing. Write `{feature}-master-pla
 | Slug | Value |
 |------|-------|
 | feature | {feature} |
+| home | {repo} |
 | artefact_dir | docs/feature/{feature}/ |
-| sub_plans_dir | sub-plans/ |
-| test_plans_dir | test-plans/ |
-| delivered | {feature}-delivered-feature-plan.md |
+
+## Repos
+
+| repo | root | host | mr_template | gates | rules |
+|------|------|------|-------------|-------|-------|
+| eden | /abs/path | git host | .gitlab/merge_request_templates/default.md | command; command | .cursorrules; AGENTS.md; .cursor/rules/api.mdc |
 
 ## Context
 
@@ -243,87 +147,81 @@ Create dirs `sub-plans/` + `test-plans/` if missing. Write `{feature}-master-pla
 
 ## Impact & Blast Radius
 
-## Gaps
-
-| # | gap | evidence |
-|---|-----|----------|
-
 ## Research Notes
 
-## Deliverable Phases
+| claim | evidence | kind |
+|-------|----------|------|
+| | path:line or URL#section | verified or inferred |
 
-### Phase 01 — {name}
+## Decisions
 
-Outcome: {actor, input, output — one sentence}.
-Depends on: none | Phase NN.
+## Sub 01 — {repo} — {task}
 
-Existing tests that must still pass:
+Outcome: {actor, input, output}.
+Needs: none.
+Deploys alone: {flag, dormant route, or additive}.
 
-| File | Test name |
-|------|-----------|
+### Files
 
-New tests this phase owns (names only until sub is walked):
+| Action | Path | Notes |
+|--------|------|-------|
+| change | | |
 
-- {test name}
+### Scaffold
 
-- [ ] 01 — {task-slug} — {one-line description} → `sub-plans/01-{task-slug}-sub-plan.md`
-
-**Phase note:** {parallel OK | blocks Phase NN | subs 01–02 parallel; 03 needs 01+02}
-
-#### As built
-
-## Input / Output Matrix
-
-### Phase 01
+### Matrix
 
 | id | status | operation | when | output | side effect | repo source |
 |----|--------|-----------|------|--------|-------------|-------------|
-| P01-01 | planned | | | | | |
+| S01-01 | planned | | | | | path:line or TODO |
 
-## Process Flows
-
-### Phase 01 — current
+### Flow
 
 ```mermaid
 flowchart TD
   startNode[Start] --> operationNode[Operation]
 ```
 
-### Phase 01 — proposed
+### Tests
 
-```mermaid
-flowchart TD
-  startNode[Start] --> operationNode[Operation]
-```
+| # | edge | wstg | check | expected |
+|---|------|------|-------|----------|
+| 1 | 1 | | automated or manual | |
 
-## Test Categories
+### Deploy
 
-| Area | What to cover | Detail in |
-|------|---------------|-----------|
-| unit | | test-plans per sub |
-| integration | | test-plans per sub |
-| manual | | test-plans per sub |
+Steps from the file checks for this repo. A PHP production push is a person's step.
+
+## Edge Cases
+
+| # | scenario | layer | expected | outcome |
+|---|----------|-------|----------|---------|
+| 1 | | | | |
+
+## Security
+
+| control | ASVS chapter | evidence |
+|---------|--------------|----------|
+| | V5 validation | path:line or URL#section |
 
 ## Approvals
 
 | Gate | Status | Note |
 |------|--------|------|
-| matrix-flow | pending | |
-| ambiguity-echo | pending | |
+| ready | pending | set when step 7 passes |
 
 ## Ambiguities
 
 | id | where | unclear | blocks | recommendation |
 |----|-------|---------|--------|----------------|
-| A1 | P01-01 | | yes | A: … — …. B: … — …. |
+| A1 | S01-01 | | yes | A: … — …. B: … — …. |
 
-## Decisions
+## As built
+
+## Deviations
+
+| id | planned behaviour | shipped behaviour | why |
+|----|-------------------|-------------------|-----|
 
 ## Sync Log
-
-### {date} — {step}-{task}
-- shipped:
-- matrix:
-- gates:
-- deviations:
 ~~~~
