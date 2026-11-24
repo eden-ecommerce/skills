@@ -90,8 +90,6 @@ Called by the loop. Still usable on their own.
 | `/handoff-plan` | Switch threads |
 | `/clarity-with-stakeholder` | Plain English for a PM |
 
-`/sync-plan` is deprecated. It lives in `deprecated/orchestration/` and points at `/merge-plan`.
-
 Path: [`orchestration/`](orchestration/). [`vertically-slice-changes`](orchestration/vertically-slice-changes/) stays a standalone skill.
 
 ## Blueprint skills

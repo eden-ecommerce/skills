@@ -57,8 +57,6 @@ The daily drivers call these. You can still run them on their own.
 | `/generate-handoff-doc` | A process or a rebuild is too large to hold in the chat |
 | `/clarity-with-stakeholder` | A PM needs the plain-English version |
 
-`/sync-plan` is deprecated. `/merge-plan` writes what shipped.
-
 ## Plan mode and models
 
 Step 1 runs in Plan mode and writes `docs/feature/{feature}/{feature}-master-plan.md`. It does not call CreatePlan.
