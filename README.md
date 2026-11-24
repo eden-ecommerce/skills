@@ -73,6 +73,8 @@ Path: [`rules/core-web-vitals-excellence/`](rules/core-web-vitals-excellence/). 
 
 `/prepare-review` — before handing a branch over: diff vs `origin/main`, flag breaking changes and migrations, fill the MR/PR overview (summary, features, test, deploy, revert).
 
+**Design** (`design/`): `/ux-redesign` — propose an incremental or radical redesign of a page, feature or journey before building it.
+
 **Other**: `/generate-changelog` for deploy notes.
 
 ## Developer steps
