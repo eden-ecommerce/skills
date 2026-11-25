@@ -1,6 +1,6 @@
 ---
 name: ux-redesign
-description: Steps back from a page, feature or user journey and proposes an incremental or radical redesign. Reviews the current UI against the project's own rules, existing evidence and established design systems, researches UX best practice, and proposes the design in ASCII with references and decisions to confirm, scaled to the size of the change. Use when the user runs /ux-redesign or /redesign, asks to "step back and reimagine", redesign or evaluate the UX of a page, feature or journey, or asks which UI or UX option is better.
+description: Steps back from a page, feature or user journey and proposes an incremental or radical redesign. Reviews the current UI, including its visual hierarchy, against the project's own rules, existing evidence and established design systems, researches UX best practice, and proposes the design in ASCII with references and decisions to confirm, scaled to the size of the change. Use when the user runs /ux-redesign or /redesign, asks to "step back and reimagine", redesign or evaluate the UX or visual hierarchy of a page, feature or journey, or asks which UI or UX option is better.
 agents:
   - cursor
 ---
@@ -110,6 +110,7 @@ If the project has no rules on a topic, say so, and base the decision on the res
 
 - Follow the approach chosen in step 2.
 - Put the most common job first. Give each area one clear primary action.
+- Give the page a clear visual hierarchy. What matters most should catch the eye first, using size, weight, position, spacing and contrast. Ask what someone sees first, second and third, and check that order matches the order of the jobs.
 - Keep it calm: no alarm words or red for normal states, and no repeating the same fact in a summary, a tab and a badge (unless the research calls for it).
 - On overview pages, put related cards side by side and use the width on wide screens. Keep forms and running text to a readable width, about 75 characters a line, and start from a single column on small screens ([GOV.UK Design System](https://design-system.service.gov.uk/styles/layout/)).
 - Status must stand out from the text around it, and not by colour alone.
@@ -148,6 +149,11 @@ What data exists and what it shows, or that there is none.
 ### Bugs you can see on the page
 
 ### Copy and naming (against the project's rules)
+
+### Visual hierarchy
+
+What catches the eye first, second and third, and whether that matches what
+matters most on the page.
 
 ### UI best practice
 
