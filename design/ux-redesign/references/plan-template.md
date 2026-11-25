@@ -24,6 +24,11 @@ What data exists and what it shows, or that there is none.
 
 ### Copy and naming (against the project's rules)
 
+### Visual hierarchy
+
+What catches the eye first, second and third, and whether that matches what
+matters most on the page.
+
 ### UI best practice
 
 ### Accessibility
