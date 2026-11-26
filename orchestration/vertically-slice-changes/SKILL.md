@@ -91,6 +91,27 @@ glab mr create --source-branch feature/<name>/slice-2-core --target-branch featu
 
 To change an earlier slice, check out that branch, commit there, rebase the branches above it, then `git push --force-with-lease` each rewritten branch. Do not use `--force` without `--force-with-lease`.
 
+### GitLab without `glab`
+
+When `command -v glab` finds nothing, open each merge request with GitLab push options on the push itself. Do not install `glab` and do not call the GitLab API with a token.
+
+Write the body to a file first. Git refuses a push option that contains a newline, so replace each newline with the two characters `\n`. GitLab 15.0 and later turn them back into newlines.
+
+```bash
+desc=$(< /tmp/slice-1.md)
+desc=${desc//$'\n'/\\n}
+git push -u origin HEAD \
+  -o merge_request.create \
+  -o merge_request.target=main \
+  -o "merge_request.title=Draft: <title>" \
+  -o "merge_request.description=$desc"
+```
+
+- The `Draft:` title prefix stands in for `--draft`.
+- Read the body from a file. Do not build it with a heredoc inside `$(...)`. macOS ships bash 3.2, which fails on an apostrophe inside that heredoc.
+- The push prints the merge request URL. Open it and check the description. If it shows a literal `\n`, the server is older than GitLab 15.0. Use `<br>` in place of `\n` from then on, and ask a person to fix that description in the GitLab UI.
+- Push options travel only with a push that sends commits. When the branch is already up to date, git sends nothing and the options are dropped. Wherever this skill runs `glab mr update`, add the same option to the next push that sends commits instead, for example the `git push --force-with-lease` after a rebase: `-o merge_request.target=<base>` or `-o "merge_request.description=$desc"`. When no such push is due, ask a person to make the change in the GitLab UI.
+
 ---
 
 ## Phase 3: Review text, then deploy one slice at a time
