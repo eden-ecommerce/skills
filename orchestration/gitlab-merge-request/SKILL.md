@@ -7,7 +7,7 @@ agents:
 
 # GitLab merge request
 
-The caller decides the source branch, the target branch, the title, and the body. This skill only puts them on GitLab. It does not merge.
+The caller decides the source branch, the target branch, and the title. This skill puts them on GitLab, with a body from the caller or from merge-request-description. It does not merge.
 
 ## Gates
 
@@ -18,7 +18,9 @@ The caller decides the source branch, the target branch, the title, and the body
 
 ## Write the body to a file
 
-Write the description as normal Markdown in a file, for example `/tmp/<branch>.md`. Both paths below read it from that file.
+Use the body the caller gives. When there is none, write it with the [merge-request-description](../merge-request-description/SKILL.md) skill, using this merge request's source and target as its branches.
+
+Save the description as normal Markdown in a file, for example `/tmp/<branch>.md`. Both paths below read it from that file.
 
 Do not build the body with a heredoc inside `$(...)`. macOS ships bash 3.2, which fails on an apostrophe inside that heredoc. Write the file with the file tool, or use `read -r -d '' body <<'EOF'` without `$(...)`.
 
