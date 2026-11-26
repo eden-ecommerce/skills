@@ -28,7 +28,7 @@ Before the first edit on a master plan or a sub:
 5. Name it `feature/<feature>` for the plan, or `feature/<feature>/<step>-<repo>-<task>` for one sub.
 6. `git checkout -b <name> <base>`
 7. Push only that branch: `git push -u origin HEAD`
-8. Open the pull request or merge request. The target is `main`, `master`, or `develop`. A person merges it.
+8. Open the pull request or merge request. The target is `main`, `master`, or `develop`. A person merges it. On GitLab, use the `gitlab-merge-request` skill.
 
 - Do not `gh pr merge` or `glab mr merge`.
 - Stop when the push refspec is `main`, `master`, `HEAD:main`, or `HEAD:master`.

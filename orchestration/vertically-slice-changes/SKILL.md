@@ -1,6 +1,6 @@
 ---
 name: vertically-slice-changes
-description: Guides feature planning and implementation using vertical slicing, stacked git pull requests or GitLab merge requests, and failure-recovery protocols. Use when breaking large tasks into small, testable, end-to-end pull requests or merge requests, writing each one so it can be tested and deployed on its own, managing stacked branches with GitHub CLI (`gh` / `gh stack`) or GitLab CLI (`glab`), or handling stack collapse and local backup branches.
+description: Guides feature planning and implementation using vertical slicing, stacked git pull requests or GitLab merge requests, and failure-recovery protocols. Use when breaking large tasks into small, testable, end-to-end pull requests or merge requests, writing each one so it can be tested and deployed on its own, managing stacked branches with GitHub CLI (`gh` / `gh stack`) or the gitlab-merge-request skill, or handling stack collapse and local backup branches.
 agents:
   - cursor
 ---
@@ -75,18 +75,16 @@ To change an earlier slice, `gh stack checkout` that branch, commit there, then 
 
 ### GitLab
 
-Requires `glab`, installed and authenticated. `glab stack` is experimental and names its own branches, so do not use it for this workflow. Create the named branches and open each merge request with the parent as the target.
+Create the named branches. Push each one and open its merge request with the [gitlab-merge-request](../gitlab-merge-request/SKILL.md) skill, as a draft, with the parent as the target. That skill works with or without `glab`. Do not use `glab stack`: it is experimental and names its own branches.
 
 ```bash
 git checkout -b feature/<name>/slice-1-base main
 # commit slice 1 only
-git push -u origin HEAD
-glab mr create --source-branch feature/<name>/slice-1-base --target-branch main --title "<title>" --draft --yes --description-file /tmp/slice-1.md
+# gitlab-merge-request: target main, draft, body /tmp/slice-1.md
 
 git checkout -b feature/<name>/slice-2-core
 # commit slice 2 only
-git push -u origin HEAD
-glab mr create --source-branch feature/<name>/slice-2-core --target-branch feature/<name>/slice-1-base --title "<title>" --draft --yes --description-file /tmp/slice-2.md
+# gitlab-merge-request: target feature/<name>/slice-1-base, draft, body /tmp/slice-2.md
 ```
 
 To change an earlier slice, check out that branch, commit there, rebase the branches above it, then `git push --force-with-lease` each rewritten branch. Do not use `--force` without `--force-with-lease`.
@@ -95,13 +93,13 @@ To change an earlier slice, check out that branch, commit there, rebase the bran
 
 ## Phase 3: Review text, then deploy one slice at a time
 
-Opening the stack does not write the review text. On GitHub, `gh stack submit --auto` opens draft pull requests. On GitLab, `glab mr create` opens the merge requests. Before anyone is asked to review, set each body. On GitHub use `gh pr edit`. On GitLab use `glab mr update <id> --description-file <file> --yes`.
+Opening the stack does not write the review text. On GitHub, `gh stack submit --auto` opens draft pull requests. On GitLab, the gitlab-merge-request skill opens the merge requests. Before anyone is asked to review, set each body. Write it with the [merge-request-description](../merge-request-description/SKILL.md) skill, naming the slice branch and its parent. On GitHub set it with `gh pr edit`. On GitLab set it with the gitlab-merge-request skill.
 
 A developer should be able to test this slice without reading the other reviews.
 
 A slice that does not compile is not a slice. Land a file after the files it imports. Each slice stays safe to deploy on its own, through a feature flag, a dormant route, or an additive change. If a slice cannot be deployed alone, say so in the body and split the slice until it can.
 
-Write the body in plain sentences. Do not use em dashes. Do not use filler such as "ensuring" or "highlighting". Do not start a line with a bold label that repeats the sentence. The body uses only these headings from [references/pull_request_template.md](references/pull_request_template.md): Summary, Scope, Dev test plan, Deployment plan, Reversion plan.
+Write the body in plain sentences. Do not use em dashes. Do not use filler such as "ensuring" or "highlighting". Do not start a line with a bold label that repeats the sentence. When the repo has its own merge request or pull request template, use its headings and put the content below under them. Otherwise the body uses only these headings from [references/pull_request_template.md](references/pull_request_template.md): Summary, Scope, Dev test plan, Deployment plan, Reversion plan.
 
 Run the file checks in that template before filling Deployment plan or Reversion plan. Keep each subsection the check matched. Delete every subsection it did not match. Do not leave another repo's deploy steps in this body. Where a kept line names a system this repo does not have, write "none". Do not delete a heading that the check kept.
 
@@ -132,7 +130,7 @@ Copy the numbered steps from the sections the file checks kept. Do not invent a 
 1. Merge this pull request only, into `main`, or into `develop` for a PHP repo.
 2. Deploy this slice by the kept section. A PHP production push, `worker-deploy`, and `terraform apply` are a person's actions. The agent does not run them.
 3. Run the dev test plan on the deployed result.
-4. Point the next review at the base branch (`main`, or `develop` for PHP). On GitHub, run `gh stack sync --remote origin`. On GitLab, rebase the next branch onto that base, run `git push --force-with-lease`, then `glab mr update <id> --target-branch <base> --yes`.
+4. Point the next review at the base branch (`main`, or `develop` for PHP). On GitHub, run `gh stack sync --remote origin`. On GitLab, rebase the next branch onto that base, push it with `--force-with-lease`, and change its target to the base with the gitlab-merge-request skill.
 5. Do not merge the next slice until this one has been deployed and tested.
 
 ### Reversion plan
@@ -147,8 +145,7 @@ Fill [references/pull_request_template.md](references/pull_request_template.md) 
 # GitHub
 gh pr edit <number> --body-file <filled-template>
 
-# GitLab
-glab mr update <id> --description-file <filled-template> --yes
+# GitLab: set the description from <filled-template> with the gitlab-merge-request skill
 ```
 
 ---
@@ -170,7 +167,7 @@ Collapse is a merged lower slice (including a squash merge) leaving the branches
 1. Do not `git push --force` without `--force-with-lease`.
 2. Rebase each open branch onto its new parent. After a squash merge, use `git rebase --onto <new-parent> <old-parent> <branch>`.
 3. On a conflict, resolve it, then `git rebase --continue`. If the resolution is wrong, `git rebase --abort`.
-4. `git push --force-with-lease` each rewritten branch, then `glab mr update <id> --target-branch <new-parent> --yes`.
+4. Push each rewritten branch with `--force-with-lease`, and change its target to the new parent with the gitlab-merge-request skill.
 5. Confirm the next open merge request targets the new parent (or `main`). Delete local branches whose merge requests have merged.
 
 ---

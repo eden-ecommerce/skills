@@ -93,6 +93,8 @@ Called by the loop. Still usable on their own.
 | `/review-implementation` | Review a diff outside Build |
 | `/handoff-plan` | Switch threads |
 | `/clarity-with-stakeholder` | Plain English for a PM |
+| `/gitlab-merge-request` | Open a GitLab merge request, set its description, or change its target, with or without `glab` |
+| `/merge-request-description` | Write a merge request or pull request description for the current branch from the repo's GitLab or GitHub template |
 
 Path: [`orchestration/`](orchestration/). [`vertically-slice-changes`](orchestration/vertically-slice-changes/) stays a standalone skill.
 
