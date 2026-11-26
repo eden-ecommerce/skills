@@ -93,13 +93,13 @@ To change an earlier slice, check out that branch, commit there, rebase the bran
 
 ## Phase 3: Review text, then deploy one slice at a time
 
-Opening the stack does not write the review text. On GitHub, `gh stack submit --auto` opens draft pull requests. On GitLab, the gitlab-merge-request skill opens the merge requests. Before anyone is asked to review, set each body. On GitHub use `gh pr edit`. On GitLab set it with the gitlab-merge-request skill.
+Opening the stack does not write the review text. On GitHub, `gh stack submit --auto` opens draft pull requests. On GitLab, the gitlab-merge-request skill opens the merge requests. Before anyone is asked to review, set each body. Write it with the [merge-request-description](../merge-request-description/SKILL.md) skill, naming the slice branch and its parent. On GitHub set it with `gh pr edit`. On GitLab set it with the gitlab-merge-request skill.
 
 A developer should be able to test this slice without reading the other reviews.
 
 A slice that does not compile is not a slice. Land a file after the files it imports. Each slice stays safe to deploy on its own, through a feature flag, a dormant route, or an additive change. If a slice cannot be deployed alone, say so in the body and split the slice until it can.
 
-Write the body in plain sentences. Do not use em dashes. Do not use filler such as "ensuring" or "highlighting". Do not start a line with a bold label that repeats the sentence. The body uses only these headings from [references/pull_request_template.md](references/pull_request_template.md): Summary, Scope, Dev test plan, Deployment plan, Reversion plan.
+Write the body in plain sentences. Do not use em dashes. Do not use filler such as "ensuring" or "highlighting". Do not start a line with a bold label that repeats the sentence. When the repo has its own merge request or pull request template, use its headings and put the content below under them. Otherwise the body uses only these headings from [references/pull_request_template.md](references/pull_request_template.md): Summary, Scope, Dev test plan, Deployment plan, Reversion plan.
 
 Run the file checks in that template before filling Deployment plan or Reversion plan. Keep each subsection the check matched. Delete every subsection it did not match. Do not leave another repo's deploy steps in this body. Where a kept line names a system this repo does not have, write "none". Do not delete a heading that the check kept.
 
